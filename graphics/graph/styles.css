@@ -1,0 +1,39 @@
+#mynetwork {
+  width: 90vw;
+  margin: auto;
+  margin-top: auto;
+  height: 72vh;
+  border: 3px solid black;
+  border-radius: 5px;
+}
+
+details[data-popover] > summary:focus {
+  outline: none;
+}
+
+details[data-popover] > summary::-webkit-details-marker {
+  display: none;
+}
+
+details[data-popover] > summary {
+  list-style: none;
+}
+
+details[data-popover] > summary {
+  list-style: none;
+  text-decoration: underline dotted teal;
+}
+
+details[data-popover] {
+  position: relative;
+}
+
+details[data-popover] > summary + * {
+  position: absolute;
+}
+
+details[data-popover='up'] > summary + * {
+  top: calc(0.5rem + 100%);
+  right: 50%;
+  transform: translateX(50%);
+}
