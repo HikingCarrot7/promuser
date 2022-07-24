@@ -42,7 +42,6 @@ function createMoodleNodes() {
         color: 'red',
       },
     },
-
     {
       data: {
         id: 'mod_assign',
@@ -62,6 +61,13 @@ function createMoodleNodes() {
   ];
 }
 
+const MIN_DIAMETER = 50;
+const MAX_DIAMETER = 200;
+
+const allStudentNodes = createStudentNodes();
+const sortedStudents = sortStudentsByAvgTimeSpent();
+enrichStudentNodesWithDiameter(allStudentNodes);
+
 function createStudentNodes() {
   return Object.keys(info).map((student) => {
     return {
@@ -69,8 +75,41 @@ function createStudentNodes() {
         id: student,
         color: 'green',
         label: student,
+        avgTimeSpent: info[student][2],
       },
     };
+  });
+}
+
+function enrichStudentNodesWithDiameter(studentNodes) {
+  studentNodes.forEach((node) => {
+    node.data = {
+      ...node.data,
+      diameter: calculateDiameter(node.data.avgTimeSpent, studentNodes),
+    };
+  });
+}
+
+function calculateDiameter(x, studentNodes) {
+  const { min, max } = extractMinAndMaxAvgTimeSpentFrom(studentNodes);
+  if (min === max) {
+    return MIN_DIAMETER;
+  }
+  return (
+    ((x - min) / (max - min)) * (MAX_DIAMETER - MIN_DIAMETER) + MIN_DIAMETER
+  );
+}
+
+function extractMinAndMaxAvgTimeSpentFrom(studentNodes) {
+  return {
+    min: studentNodes[studentNodes.length - 1].data.avgTimeSpent,
+    max: studentNodes[0].data.avgTimeSpent,
+  };
+}
+
+function sortStudentsByAvgTimeSpent() {
+  return allStudentNodes.sort((a, b) => {
+    return b.data.avgTimeSpent - a.data.avgTimeSpent;
   });
 }
 
@@ -94,11 +133,8 @@ function createEdges(studentNodes) {
   return edges;
 }
 
-const allStudentNodes = createStudentNodes();
-
 const nodes = [...createMoodleNodes(), ...allStudentNodes];
 const edges = [...createEdges(allStudentNodes)];
-
 const elements = [...nodes, ...edges];
 
 function graphLayout() {
@@ -121,6 +157,8 @@ const cy = cytoscape({
         shape: 'circle',
         'background-color': 'data(color)',
         label: 'data(label)',
+        width: 'data(diameter)',
+        height: 'data(diameter)',
       },
     },
     {
@@ -139,6 +177,7 @@ $(function () {
     onClose: function () {
       const selectedStudentNames = getSelectedStudentNames();
       const selectedStudentNodes = selectStudentNodes(selectedStudentNames);
+      enrichStudentNodesWithDiameter(selectedStudentNodes);
       updateGraph(selectedStudentNodes);
     },
     width: '100%',
