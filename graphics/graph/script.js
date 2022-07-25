@@ -1,72 +1,14 @@
 // const info = JSON.parse(sessionStorage.getItem("classInformationByDay"));
 
-function createMoodleNodes() {
-  return [
-    {
-      data: {
-        id: 'mod_resource',
-        label: 'mod_resource',
-        level: 100,
-        color: 'red',
-      },
-    },
-    {
-      data: {
-        id: 'mod_forum',
-        label: 'mod_forum',
-        level: 100,
-        color: 'red',
-      },
-    },
-    {
-      data: {
-        id: 'mod_page',
-        label: 'mod_page',
-        level: 100,
-        color: 'red',
-      },
-    },
-    {
-      data: {
-        id: 'mod_folder',
-        label: 'mod_folder',
-        level: 100,
-        color: 'red',
-      },
-    },
-    {
-      data: {
-        id: 'mod_url',
-        label: 'mod_url',
-        level: 100,
-        color: 'red',
-      },
-    },
-    {
-      data: {
-        id: 'mod_assign',
-        label: 'mod_assign',
-        level: 100,
-        color: 'red',
-      },
-    },
-    {
-      data: {
-        id: 'mod_wiki',
-        label: 'mod_wiki',
-        level: 100,
-        color: 'red',
-      },
-    },
-  ];
-}
-
 const MIN_DIAMETER = 50;
-const MAX_DIAMETER = 200;
+const MAX_DIAMETER = 300;
 
 const allStudentNodes = createStudentNodes();
 const sortedStudents = sortStudentsByAvgTimeSpent();
+const moodleModuleNodes = createMoodleNodes();
+
 enrichStudentNodesWithDiameter(allStudentNodes);
+enrichMoodleNodesWithDiameter(allStudentNodes);
 
 function createStudentNodes() {
   return Object.keys(info).map((student) => {
@@ -76,41 +18,72 @@ function createStudentNodes() {
         color: 'green',
         label: student,
         avgTimeSpent: info[student][2],
+        avgTimeSpentLabel: secondsToHms(info[student][2]),
       },
     };
   });
 }
 
 function enrichStudentNodesWithDiameter(studentNodes) {
-  studentNodes.forEach((node) => {
-    node.data = {
-      ...node.data,
-      diameter: calculateDiameter(node.data.avgTimeSpent, studentNodes),
-    };
+  const { min, max } = extractMinAndMaxAvgTimeSpentFrom(studentNodes);
+  studentNodes.forEach(({ data }) => {
+    data.diameter = calculateDiameterForNode(data.avgTimeSpent, min, max);
   });
 }
 
-function calculateDiameter(x, studentNodes) {
-  const { min, max } = extractMinAndMaxAvgTimeSpentFrom(studentNodes);
-  if (min === max) {
-    return MIN_DIAMETER;
-  }
-  return (
-    ((x - min) / (max - min)) * (MAX_DIAMETER - MIN_DIAMETER) + MIN_DIAMETER
-  );
+function enrichMoodleNodesWithDiameter(studentNodes) {
+  const { min, max } = extractMinAndMaxAvgTimeSpentForModules(studentNodes);
+  moodleModuleNodes.forEach(({ data }) => {
+    data.diameter = calculateDiameterForNode(data.avgTimeSpent, min, max);
+  });
 }
 
 function extractMinAndMaxAvgTimeSpentFrom(studentNodes) {
+  function mapToAvgTimeSpent() {
+    return studentNodes.map((studentNode) => studentNode.data.avgTimeSpent);
+  }
+
   return {
-    min: studentNodes[studentNodes.length - 1].data.avgTimeSpent,
-    max: studentNodes[0].data.avgTimeSpent,
+    min: Math.min(...mapToAvgTimeSpent()),
+    max: Math.max(...mapToAvgTimeSpent()),
   };
+}
+
+function extractMinAndMaxAvgTimeSpentForModules(studentNodes) {
+  enrichMoodleModulesWithAvgTimeSpent(studentNodes);
+
+  function mapToAvgTimeSpent() {
+    return moodleModuleNodes.map(({ data }) => data.avgTimeSpent);
+  }
+
+  return {
+    min: Math.min(...mapToAvgTimeSpent()),
+    max: Math.max(...mapToAvgTimeSpent()),
+  };
+}
+
+function enrichMoodleModulesWithAvgTimeSpent(studentNodes) {
+  moodleModuleNodes.forEach(({ data }) => {
+    data.avgTimeSpent = calculateAvgTimeSpentForModule(studentNodes, data.id);
+    data.avgTimeSpentLabel = secondsToHms(data.avgTimeSpent);
+  });
 }
 
 function sortStudentsByAvgTimeSpent() {
   return allStudentNodes.sort((a, b) => {
     return b.data.avgTimeSpent - a.data.avgTimeSpent;
   });
+}
+
+function calculateAvgTimeSpentForModule(studentNodes, module) {
+  let result = 0;
+  studentNodes.forEach(({ data }) => {
+    const studentAvgTimeSpentModule = info[data.id][0][module];
+    if (studentAvgTimeSpentModule) {
+      result += studentAvgTimeSpentModule;
+    }
+  });
+  return result / studentNodes.length;
 }
 
 function createEdges(studentNodes) {
@@ -122,7 +95,7 @@ function createEdges(studentNodes) {
           id: Math.random(),
           source: data.id,
           target: module,
-          label: info[data.id][0][module], // Average as label
+          label: secondsToHms(info[data.id][0][module]), // Averate time spent in that module
         },
       };
     });
@@ -133,7 +106,7 @@ function createEdges(studentNodes) {
   return edges;
 }
 
-const nodes = [...createMoodleNodes(), ...allStudentNodes];
+const nodes = [...moodleModuleNodes, ...allStudentNodes];
 const edges = [...createEdges(allStudentNodes)];
 const elements = [...nodes, ...edges];
 
@@ -164,7 +137,6 @@ const cy = cytoscape({
     {
       selector: 'edge',
       style: {
-        'curve-style': 'bezier',
         'target-arrow-shape': 'triangle',
       },
     },
@@ -172,12 +144,21 @@ const cy = cytoscape({
   layout: graphLayout(),
 });
 
+function updateGraph(studentNodes) {
+  enrichStudentNodesWithDiameter(studentNodes);
+  enrichMoodleNodesWithDiameter(studentNodes);
+  const edges = createEdges(studentNodes);
+  cy.elements().remove();
+  cy.add([...moodleModuleNodes, ...studentNodes, ...edges]);
+  cy.makeLayout(graphLayout()).run();
+  addGraphTooltips();
+}
+
 $(function () {
   $('#ms').multipleSelect({
     onClose: function () {
       const selectedStudentNames = getSelectedStudentNames();
       const selectedStudentNodes = selectStudentNodes(selectedStudentNames);
-      enrichStudentNodesWithDiameter(selectedStudentNodes);
       updateGraph(selectedStudentNodes);
     },
     width: '100%',
@@ -189,14 +170,6 @@ $(function () {
 
 function getSelectedStudentNames() {
   return $('#ms').multipleSelect('getSelects', 'text');
-}
-
-function updateGraph(studentNodes) {
-  const edges = createEdges(studentNodes);
-  cy.elements().remove();
-  cy.add([...createMoodleNodes(), ...studentNodes, ...edges]);
-  cy.makeLayout(graphLayout()).run();
-  addGraphTooltips();
 }
 
 function selectStudentNodes(studentNames) {
@@ -215,33 +188,7 @@ function populateStudentDropdown() {
   const studentDropdown = $('#ms');
   $.each(allStudentNodes, function () {
     const { id } = this.data;
-    studentDropdown.append($('<option />').val(Math.random).text(id));
-  });
-}
-
-function addGraphTooltips() {
-  cy.elements().forEach(function (ele) {
-    makePopper(ele);
-  });
-
-  cy.elements().unbind('mouseover');
-  cy.elements().bind('mouseover', (event) => event.target.tippy.show());
-
-  cy.elements().unbind('mouseout');
-  cy.elements().bind('mouseout', (event) => event.target.tippy.hide());
-}
-
-function makePopper(ele) {
-  let ref = ele.popperRef(); // used only for positioning
-
-  ele.tippy = tippy(ref, {
-    // tippy options:
-    content: () => {
-      const content = document.createElement('div');
-      content.innerHTML = ele.data().label;
-      return content;
-    },
-    trigger: 'manual', // probably want manual mode
+    studentDropdown.append($('<option />').val(Math.random()).text(id));
   });
 }
 
