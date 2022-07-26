@@ -26,3 +26,5 @@ function makePopper(ele) {
     trigger: 'manual', // probably want manual mode
   });
 }
+
+cy.ready(addGraphTooltips);

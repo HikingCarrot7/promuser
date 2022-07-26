@@ -15,3 +15,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     });
   }
 });
+
+$('#checkAccessFilter').click(function () {
+  $('#cutPointDiv').toggle(this.checked);
+});

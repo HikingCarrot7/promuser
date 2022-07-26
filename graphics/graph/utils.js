@@ -1,9 +1,10 @@
 function secondsToHms(seconds) {
   seconds = Number(seconds);
+  const { h, m, s } = extractHmsFromSeconds(seconds);
 
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor((seconds % 3600) % 60);
+  function format(x) {
+    return ('0' + x).slice(-2);
+  }
 
   if (h <= 0) {
     return `00:${format(m)}:${format(s)}`;
@@ -12,8 +13,12 @@ function secondsToHms(seconds) {
   return `${h}:${format(m)}:${format(s)}`;
 }
 
-function format(x) {
-  return ('0' + x).slice(-2);
+function extractHmsFromSeconds(seconds) {
+  return {
+    h: Math.floor(seconds / 3600),
+    m: Math.floor((seconds % 3600) / 60),
+    s: Math.floor((seconds % 3600) % 60),
+  };
 }
 
 function calculateDiameterForNode(x, min, max) {

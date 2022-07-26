@@ -17,6 +17,7 @@ function createStudentNodes() {
         id: student,
         color: 'green',
         label: student,
+        accesses: info[student][1],
         avgTimeSpent: info[student][2],
         avgTimeSpentLabel: secondsToHms(info[student][2]),
       },
@@ -154,42 +155,44 @@ function updateGraph(studentNodes) {
   addGraphTooltips();
 }
 
-$(function () {
-  $('#ms').multipleSelect({
-    onClose: function () {
-      const selectedStudentNames = getSelectedStudentNames();
-      const selectedStudentNodes = selectStudentNodes(selectedStudentNames);
-      updateGraph(selectedStudentNodes);
-    },
-    width: '100%',
-    filter: true,
-  });
-
-  refreshStudentDropdown();
+// Calculate access avg
+$('#checkAccessFilter').click(function () {
+  if (this.checked) {
+    const accessAvg = calculateAccessAvg(getSelectedStudentNodes());
+    $('#cutPointInput').val(accessAvg);
+  } else {
+    applyBgColorFor(allStudentNodes, 'green');
+  }
 });
 
-function getSelectedStudentNames() {
-  return $('#ms').multipleSelect('getSelects', 'text');
+$('#applyAccessFilter').click(function () {
+  const cutPoint = $('#cutPointInput').val();
+  const selectedStudentNodes = getSelectedStudentNodes();
+  const { studentsAbove, studentsBellow } = classifyStudentsByAboveAndBellowFor(
+    cutPoint,
+    selectedStudentNodes
+  );
+  applyBgColorFor(studentsAbove, 'blue');
+  applyBgColorFor(studentsBellow, 'brown');
+});
+
+function classifyStudentsByAboveAndBellowFor(cutPoint, studentNodes) {
+  return {
+    studentsAbove: studentNodes.filter(({ data }) => data.accesses >= cutPoint),
+    studentsBellow: studentNodes.filter(({ data }) => data.accesses < cutPoint),
+  };
 }
 
-function selectStudentNodes(studentNames) {
-  if (studentNames.length == 0) {
-    return allStudentNodes; // All nodes are selected by default.
-  }
-  return allStudentNodes.filter(({ data }) => studentNames.includes(data.id));
+function calculateAccessAvg(studentNodes) {
+  let totalAccesses = 0;
+  studentNodes.forEach(({ data }) => {
+    totalAccesses += data.accesses;
+  });
+  return parseInt(totalAccesses / studentNodes.length);
 }
 
-function refreshStudentDropdown() {
-  populateStudentDropdown();
-  $('#ms').multipleSelect('refreshOptions', {});
-}
-
-function populateStudentDropdown() {
-  const studentDropdown = $('#ms');
-  $.each(allStudentNodes, function () {
-    const { id } = this.data;
-    studentDropdown.append($('<option />').val(Math.random()).text(id));
+function applyBgColorFor(nodes, color) {
+  nodes.forEach(({ data }) => {
+    cy.nodes(`[id = "${data.id}"]`).style('background-color', color);
   });
 }
-
-cy.ready(addGraphTooltips);

@@ -35,25 +35,32 @@
                 <input
                   type="checkbox"
                   class="form-check-input"
-                  id="exampleCheck1"
+                  id="checkAccessFilter"
                 />
-                <label class="form-check-label mb-2" for="exampleCheck1">
-                  Habilitar filtrado por número de acceso al curso
+                <label class="form-check-label mb-2" for="checkAccessFilter">
+                  Habilitar filtrado por número de acceso
                 </label>
               </div>
-              <label for="">Modifique el punto de corte:</label>
-              <div class="input-group mb-3">
-                <input
-                  type="number"
-                  class="form-control"
-                  placeholder="Punto de corte"
-                  aria-label="Punto de corte"
-                  aria-describedby="basic-addon2"
-                />
-                <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button">
-                    Aplicar
-                  </button>
+              <div id="cutPointDiv" style="display: none">
+                <label for="cutPointInput">Modifique el punto de corte:</label>
+                <div class="input-group mb-3">
+                  <input
+                    id="cutPointInput"
+                    type="number"
+                    class="form-control"
+                    placeholder="Punto de corte"
+                    aria-label="Punto de corte"
+                    aria-describedby="basic-addon2"
+                  />
+                  <div class="input-group-append">
+                    <button
+                      id="applyAccessFilter"
+                      class="btn btn-outline-secondary"
+                      type="button"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -137,8 +144,9 @@
     <script src="common/info.js"></script>
     <script src="common/sidebar/sidebar.js"></script>
     <script src="graph/utils.js"></script>
-    <script src="graph/tooltips.js"></script>
     <script src="graph/moodle.js"></script>
     <script src="graph/script.js"></script>
+    <script src="graph/tooltips.js"></script>
+    <script src="graph/dropdown.js"></script>
   </body>
 </html>
