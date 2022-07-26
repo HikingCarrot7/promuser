@@ -9,7 +9,7 @@ function createMoodleNodes() {
         id: 'mod_resource',
         label: 'Resource',
         level: 100,
-        color: 'red',
+        color: '#7ADE40',
       },
     },
     {
@@ -17,7 +17,7 @@ function createMoodleNodes() {
         id: 'mod_forum',
         label: 'Forum',
         level: 100,
-        color: 'red',
+        color: '#95C0F9',
       },
     },
     {
@@ -25,7 +25,7 @@ function createMoodleNodes() {
         id: 'mod_page',
         label: 'Page',
         level: 100,
-        color: 'red',
+        color: '#FCFC00',
       },
     },
     {
@@ -33,7 +33,7 @@ function createMoodleNodes() {
         id: 'mod_folder',
         label: 'Folder',
         level: 100,
-        color: 'red',
+        color: '#F87D7F',
       },
     },
     {
@@ -41,7 +41,7 @@ function createMoodleNodes() {
         id: 'mod_url',
         label: 'URL',
         level: 100,
-        color: 'red',
+        color: '#E87CF1',
       },
     },
     {
@@ -49,7 +49,7 @@ function createMoodleNodes() {
         id: 'mod_assign',
         label: 'Assign',
         level: 100,
-        color: 'red',
+        color: '#AB83E1',
       },
     },
     {
@@ -57,7 +57,7 @@ function createMoodleNodes() {
         id: 'mod_wiki',
         label: 'Wiki',
         level: 100,
-        color: 'red',
+        color: '#FCA607',
       },
     },
   ];

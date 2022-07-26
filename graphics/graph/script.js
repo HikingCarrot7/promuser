@@ -1,8 +1,5 @@
 // const info = JSON.parse(sessionStorage.getItem("classInformationByDay"));
 
-const MIN_DIAMETER = 50;
-const MAX_DIAMETER = 300;
-
 const allStudentNodes = createStudentNodes();
 const sortedStudents = sortStudentsByAvgTimeSpent();
 const moodleModuleNodes = createMoodleNodes();
@@ -15,7 +12,7 @@ function createStudentNodes() {
     return {
       data: {
         id: student,
-        color: 'green',
+        color: STUDENT_NODE_COLOR,
         label: student,
         accesses: info[student][1],
         avgTimeSpent: info[student][2],
@@ -161,20 +158,22 @@ $('#checkAccessFilter').click(function () {
     const accessAvg = calculateAccessAvg(getSelectedStudentNodes());
     $('#cutPointInput').val(accessAvg);
   } else {
-    applyBgColorFor(allStudentNodes, 'green');
+    applyBgColorFor(allStudentNodes, STUDENT_NODE_COLOR);
   }
 });
 
-$('#applyAccessFilter').click(function () {
+$('#applyAccessFilter').click(applyAccessFilter);
+
+function applyAccessFilter() {
   const cutPoint = $('#cutPointInput').val();
   const selectedStudentNodes = getSelectedStudentNodes();
   const { studentsAbove, studentsBellow } = classifyStudentsByAboveAndBellowFor(
     cutPoint,
     selectedStudentNodes
   );
-  applyBgColorFor(studentsAbove, 'blue');
-  applyBgColorFor(studentsBellow, 'brown');
-});
+  applyBgColorFor(studentsAbove, STUDENT_ABOVE_POINTCUT_COLOR);
+  applyBgColorFor(studentsBellow, STUDENT_BELLOW_POINTCUT_COLOR);
+}
 
 function classifyStudentsByAboveAndBellowFor(cutPoint, studentNodes) {
   return {

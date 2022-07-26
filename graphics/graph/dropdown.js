@@ -3,6 +3,9 @@ $(function () {
     onClose: function () {
       const selectedStudentNodes = getSelectedStudentNodes();
       updateGraph(selectedStudentNodes);
+      if ($('#checkAccessFilter').is(':checked')) {
+        applyAccessFilter();
+      }
     },
     width: '100%',
     filter: true,

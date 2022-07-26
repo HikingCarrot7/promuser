@@ -23,9 +23,10 @@ function extractHmsFromSeconds(seconds) {
 
 function calculateDiameterForNode(x, min, max) {
   if (min === max) {
-    return MIN_DIAMETER;
+    return MIN_NODE_DIAMETER;
   }
   return (
-    ((x - min) / (max - min)) * (MAX_DIAMETER - MIN_DIAMETER) + MIN_DIAMETER
+    ((x - min) / (max - min)) * (MAX_NODE_DIAMETER - MIN_NODE_DIAMETER) +
+    MIN_NODE_DIAMETER
   );
 }
