@@ -139,6 +139,7 @@ const cy = cytoscape({
       },
     },
   ],
+  wheelSensitivity: 0.3,
   layout: graphLayout(),
 });
 
