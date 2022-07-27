@@ -7,4 +7,4 @@ global $DB;
 global $COURSE;
 global $USER;
 
-require 'graph/index.html';
+require 'class_network/index.html';

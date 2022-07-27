@@ -30,3 +30,9 @@ function calculateDiameterForNode(x, min, max) {
     MIN_NODE_DIAMETER
   );
 }
+
+function clearArray(array) {
+  while (array.length > 0) {
+    array.pop();
+  }
+}

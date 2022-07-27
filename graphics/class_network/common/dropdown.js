@@ -1,11 +1,8 @@
 $(function () {
   $('#ms').multipleSelect({
     onClose: function () {
-      const selectedStudentNodes = getSelectedStudentNodes();
-      updateGraph(selectedStudentNodes);
-      if ($('#checkAccessFilter').is(':checked')) {
-        applyAccessFilter();
-      }
+      onStudentSelectionForGraph();
+      onStudentSelectionForChart();
     },
     width: '100%',
     filter: true,
@@ -19,13 +16,14 @@ function getSelectedStudentNodes() {
 }
 
 function getSelectedStudentNames() {
-  return $('#ms').multipleSelect('getSelects', 'text');
+  const selectedStudentNames = $('#ms').multipleSelect('getSelects', 'text');
+  if (selectedStudentNames.length === 0) {
+    return allStudentNames; // All names are selected by default if none selected.
+  }
+  return selectedStudentNames;
 }
 
 function selectStudentNodes(studentNames) {
-  if (studentNames.length == 0) {
-    return allStudentNodes; // All nodes are selected by default.
-  }
   return allStudentNodes.filter(({ data }) => studentNames.includes(data.id));
 }
 

@@ -17,8 +17,8 @@
       href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css"
     />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@4.0.1/index.css" />
-    <link rel="stylesheet" href="graph/styles.css" />
-    <link rel="stylesheet" href="common/sidebar/sidebar.css" />
+    <link rel="stylesheet" href="class_network/styles.css" />
+    <link rel="stylesheet" href="class_network/common/sidebar/sidebar.css" />
   </head>
   <body>
     <div class="d-flex" id="wrapper">
@@ -91,6 +91,28 @@
 
             <hr />
 
+            <div>
+              <p>Ver información como:</p>
+              <div>
+                <button
+                  id="viewAsGraphBtn"
+                  type="button"
+                  class="btn btn-primary"
+                >
+                  Grafo
+                </button>
+                <button
+                  id="viewAsChartBtn"
+                  type="button"
+                  class="btn btn-primary"
+                >
+                  Barras apiladas
+                </button>
+              </div>
+            </div>
+
+            <hr />
+
             <p>
               <a
                 class="link-primary"
@@ -121,13 +143,19 @@
         >
           <div class="container-fluid">
             <button class="btn btn-primary" id="sidebarToggle">
-              Opciones de gráfico
+              Opciones del gráfico
             </button>
           </div>
         </nav>
         <!-- Page content-->
-        <div class="container-fluid" style="height: 99vh">
-          <div id="mynetwork"></div>
+        <div id="graphic-wrapper" class="container-fluid">
+          <div id="myNetworkGraph"></div>
+          <canvas
+            id="myNetworkChart"
+            width="400"
+            height="400"
+            style="display: none"
+          ></canvas>
         </div>
       </div>
     </div>
@@ -156,15 +184,20 @@
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@1.0.4/cytoscape-popper.min.js"></script>
     <script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.3/Chart.js"></script>
 
-    <script src="common/info.js"></script>
-    <script src="common/sidebar/sidebar.js"></script>
-    <script src="graph/constants.js"></script>
-    <script src="graph/utils.js"></script>
-    <script src="graph/moodle.js"></script>
-    <script src="graph/script.js"></script>
-    <script src="graph/tooltips.js"></script>
-    <script src="graph/dropdown.js"></script>
-    <script src="graph/zoom.js"></script>
+    <script src="class_network/common/info.js"></script>
+    <script src="class_network/common/sidebar/sidebar.js"></script>
+    <script src="class_network/common/utils.js"></script>
+    <script src="class_network/common/moodle.js"></script>
+    <script src="class_network/graph/constants.js"></script>
+    <script src="class_network/graph/graph.js"></script>
+    <script src="class_network/graph/tooltips.js"></script>
+    <script src="class_network/graph/zoom.js"></script>
+
+    <script src="class_network/horizontal_chart/horizontal_chart.js"></script>
+
+    <script src="class_network/common/dropdown.js"></script>
+    <script src="class_network/index.js"></script>
   </body>
 </html>

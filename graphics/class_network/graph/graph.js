@@ -1,8 +1,5 @@
-// const info = JSON.parse(sessionStorage.getItem("classInformationByDay"));
-
 const allStudentNodes = createStudentNodes();
 const sortedStudents = sortStudentsByAvgTimeSpent();
-const moodleModuleNodes = createMoodleNodes();
 
 enrichStudentNodesWithDiameter(allStudentNodes);
 enrichMoodleNodesWithDiameter(allStudentNodes);
@@ -119,7 +116,7 @@ function graphLayout() {
 }
 
 const cy = cytoscape({
-  container: document.getElementById('mynetwork'),
+  container: $('#myNetworkGraph'),
   elements,
   style: [
     {
@@ -195,4 +192,12 @@ function applyBgColorFor(nodes, color) {
   nodes.forEach(({ data }) => {
     cy.nodes(`[id = "${data.id}"]`).style('background-color', color);
   });
+}
+
+function onStudentSelectionForGraph() {
+  const selectedStudentNodes = getSelectedStudentNodes();
+  updateGraph(selectedStudentNodes);
+  if ($('#checkAccessFilter').is(':checked')) {
+    applyAccessFilter();
+  }
 }
