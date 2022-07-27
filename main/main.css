@@ -1,0 +1,61 @@
+.popover__title {
+    font-size: 24px;
+    text-decoration: none;
+    text-align: center;
+    margin: 0px;
+}
+
+.popover__wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.popover__content {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    transform: translate(0, 10px);
+    left: -32px;
+    margin-top: 30px;
+    background-color: white;
+    padding: 2px;
+    padding-top: 4px;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+    width: 200px;
+    font-size: 12px;
+    font-weight: normal;
+    border-radius: 3px;
+}
+
+.popover__content p {
+    margin: 0px;
+}
+
+.popover__content:before {
+    position: absolute;
+    z-index: -1;
+    content: \"\";
+    right: calc(80% - 10px);
+    top: -8px;
+    border-style: solid;
+    border-width: 0 10px 10px 10px;
+    border-color: transparent transparent white transparent;
+    transition-duration: 0.3s;
+    transition-property: transform;
+}
+
+.popover__wrapper:hover .popover__content {
+    z-index: 10;
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0, -20px);
+    transition: all 0.5s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+}
+
+.popover__message {
+    text-align: center;
+}
+
+.image a img {
+    width: 100%;
+}
