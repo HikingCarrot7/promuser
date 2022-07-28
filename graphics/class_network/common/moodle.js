@@ -1,58 +1,37 @@
-const moodleModuleNodes = [
+const moodleModules = [
   {
-    data: {
-      id: 'mod_resource',
-      label: 'Resource',
-      level: 100,
-      color: '#7ADE40',
-    },
+    id: 'mod_resource',
+    label: 'Resource',
+    color: '#7ADE40',
   },
   {
-    data: {
-      id: 'mod_forum',
-      label: 'Forum',
-      level: 100,
-      color: '#95C0F9',
-    },
+    id: 'mod_forum',
+    label: 'Forum',
+    color: '#95C0F9',
   },
   {
-    data: {
-      id: 'mod_page',
-      label: 'Page',
-      level: 100,
-      color: '#FCFC00',
-    },
+    id: 'mod_page',
+    label: 'Page',
+    color: '#FCFC00',
   },
   {
-    data: {
-      id: 'mod_folder',
-      label: 'Folder',
-      level: 100,
-      color: '#F87D7F',
-    },
+    id: 'mod_folder',
+    label: 'Folder',
+    color: '#F87D7F',
   },
   {
-    data: {
-      id: 'mod_url',
-      label: 'URL',
-      level: 100,
-      color: '#E87CF1',
-    },
+    id: 'mod_url',
+    label: 'URL',
+    color: '#E87CF1',
   },
   {
-    data: {
-      id: 'mod_assign',
-      label: 'Assign',
-      level: 100,
-      color: '#AB83E1',
-    },
+    id: 'mod_assign',
+    label: 'Assign',
+    color: '#AB83E1',
   },
   {
-    data: {
-      id: 'mod_wiki',
-      label: 'Wiki',
-      level: 100,
-      color: '#FCA607',
-    },
+    id: 'mod_wiki',
+    label: 'Wiki',
+    color: '#FCA607',
   },
 ];

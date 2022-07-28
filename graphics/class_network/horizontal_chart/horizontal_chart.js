@@ -1,49 +1,55 @@
-const allStudentNames = Object.keys(info);
-
-function sortStudentsByTotalTimeSpent(studentNames) {
-  return studentNames.sort((a, b) => {
+function sortStudentsByTotalTimeSpent(students) {
+  return students.sort((a, b) => {
     return calculateTotalTimeSpent(b) - calculateTotalTimeSpent(a);
   });
 }
 
-function calculateTotalTimeSpent(studentName) {
-  const modules = info[studentName][0];
+function calculateTotalTimeSpent(student) {
   let totalSpent = 0;
-  Object.keys(modules).forEach((module) => {
-    const timeSpentInModule = modules[module];
+  student.modules.forEach((module) => {
+    const timeSpentInModule = student.avgTimeForModule(module);
     totalSpent += timeSpentInModule;
   });
   return totalSpent;
 }
 
-function getStudentsTimeSpentFor(studentNames, module) {
-  return studentNames.map((studentName) => info[studentName][0][module] || 0);
+function getStudentsTimeSpentFor(students, module) {
+  return students.map((student) => student.avgTimeForModule(module));
 }
 
-function createDatasetFor(studentNames) {
-  return moodleModuleNodes.map(({ data }) => {
+function createDatasetFor(students) {
+  return moodleModules.map(({ id, label, color }) => {
     return {
-      label: data.label,
-      backgroundColor: data.color,
-      data: getStudentsTimeSpentFor(studentNames, data.id),
+      label: label,
+      backgroundColor: color,
+      data: getStudentsTimeSpentFor(students, id),
     };
   });
 }
 
-const labels = [...sortStudentsByTotalTimeSpent(allStudentNames)];
+const studentsSortedByTimeSpent = sortStudentsByTotalTimeSpent(allStudents);
+
+const labels = [...extractNames(studentsSortedByTimeSpent)];
 const data = {
   labels: labels,
-  datasets: createDatasetFor(sortStudentsByTotalTimeSpent(allStudentNames)),
+  datasets: createDatasetFor(studentsSortedByTimeSpent),
 };
 
 const config = {
-  type: 'horizontalBar',
+  type: 'bar',
   data: data,
   options: {
     plugins: {
       title: {
         display: true,
-        text: 'Chart.js Bar Chart - Stacked',
+        text: 'Promedio de de cada alumno por recurso.',
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            return `${context.dataset.label} (${secondsToHms(context.raw)})`;
+          },
+        },
       },
     },
     responsive: true,
@@ -55,36 +61,39 @@ const config = {
     hover: {
       animationDuration: 1,
     },
+    indexAxis: 'y',
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            fontFamily: "'Open Sans Bold', sans-serif",
-            fontSize: 11,
+      x: {
+        ticks: {
+          beginAtZero: true,
+          fontFamily: "'Open Sans Bold', sans-serif",
+          fontSize: 11,
+          callback: function (label) {
+            return secondsToHms(label);
           },
-          scaleLabel: {
-            display: false,
-          },
-          gridLines: {},
-          stacked: true,
         },
-      ],
-      yAxes: [
-        {
-          gridLines: {
-            display: false,
-            color: '#fff',
-            zeroLineColor: '#fff',
-            zeroLineWidth: 0,
-          },
-          ticks: {
-            fontFamily: "'Open Sans Bold', sans-serif",
-            fontSize: 11,
-          },
-          stacked: true,
+        scaleLabel: {
+          display: false,
         },
-      ],
+        gridLines: {},
+        stacked: true,
+      },
+      y: {
+        gridLines: {
+          display: false,
+          color: '#fff',
+          zeroLineColor: '#fff',
+          zeroLineWidth: 0,
+        },
+        ticks: {
+          color: (c) => {
+            return 'black';
+          },
+          fontFamily: "'Open Sans Bold', sans-serif",
+          fontSize: 11,
+        },
+        stacked: true,
+      },
     },
     legend: {
       display: true,
@@ -95,17 +104,17 @@ const config = {
 const ctx = document.getElementById('myNetworkChart').getContext('2d');
 const myChart = new Chart(ctx, config);
 
-function updateChart(selectedStudentNames) {
+function updateChart(selectedStudents) {
   clearArray(myChart.data.labels);
-  myChart.data.labels.push(...selectedStudentNames);
+  myChart.data.labels.push(...selectedStudents.map(({ name }) => name));
 
   clearArray(myChart.data.datasets);
-  myChart.data.datasets.push(...createDatasetFor(selectedStudentNames));
+  myChart.data.datasets.push(...createDatasetFor(selectedStudents));
 
   myChart.update();
 }
 
 function onStudentSelectionForChart() {
-  const selectedStudentNames = getSelectedStudentNames();
-  updateChart(sortStudentsByTotalTimeSpent(selectedStudentNames));
+  const selectedStudents = getSelectedStudents();
+  updateChart(sortStudentsByTotalTimeSpent(selectedStudents));
 }

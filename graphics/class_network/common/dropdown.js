@@ -7,24 +7,23 @@ $(function () {
     width: '100%',
     filter: true,
   });
-
   refreshStudentDropdown();
 });
 
-function getSelectedStudentNodes() {
-  return selectStudentNodes(getSelectedStudentNames());
+function getSelectedStudents() {
+  return selectStudents(getSelectedStudentNames());
 }
 
 function getSelectedStudentNames() {
   const selectedStudentNames = $('#ms').multipleSelect('getSelects', 'text');
   if (selectedStudentNames.length === 0) {
-    return allStudentNames; // All names are selected by default if none selected.
+    return extractNames(allStudents); // All names are selected by default if none selected.
   }
   return selectedStudentNames;
 }
 
-function selectStudentNodes(studentNames) {
-  return allStudentNodes.filter(({ data }) => studentNames.includes(data.id));
+function selectStudents(studentNames) {
+  return allStudents.filter(({ name }) => studentNames.includes(name));
 }
 
 function refreshStudentDropdown() {
@@ -34,8 +33,8 @@ function refreshStudentDropdown() {
 
 function populateStudentDropdown() {
   const studentDropdown = $('#ms');
-  $.each(allStudentNodes, function () {
-    const { id } = this.data;
-    studentDropdown.append($('<option />').val(Math.random()).text(id));
+  $.each(allStudents, function () {
+    const { name } = this;
+    studentDropdown.append($('<option />').val(Math.random()).text(name));
   });
 }

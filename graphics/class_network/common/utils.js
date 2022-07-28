@@ -21,7 +21,7 @@ function extractHmsFromSeconds(seconds) {
   };
 }
 
-function calculateDiameterForNode(x, min, max) {
+function calculateDiameterFor(x, min, max) {
   if (min === max) {
     return MIN_NODE_DIAMETER;
   }
@@ -35,4 +35,23 @@ function clearArray(array) {
   while (array.length > 0) {
     array.pop();
   }
+}
+
+function classifyStudentsByAboveAndBellowFor(cutPoint, students) {
+  return {
+    studentsAbove: students.filter(({ accesses }) => accesses >= cutPoint),
+    studentsBellow: students.filter(({ accesses }) => accesses < cutPoint),
+  };
+}
+
+function calculateAccessAvg(students) {
+  let totalAccesses = 0;
+  students.forEach(({ accesses }) => {
+    totalAccesses += accesses;
+  });
+  return parseInt(totalAccesses / students.length);
+}
+
+function extractNames(students) {
+  return students.map(({ name }) => name);
 }
