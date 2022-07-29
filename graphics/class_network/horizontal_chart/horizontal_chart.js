@@ -1,3 +1,5 @@
+const studentsLabelColor = new Map();
+
 function sortStudentsByTotalTimeSpent(students) {
   return students.sort((a, b) => {
     return calculateTotalTimeSpent(b) - calculateTotalTimeSpent(a);
@@ -52,15 +54,21 @@ const config = {
         },
       },
     },
-    responsive: true,
-    pointLabelFontFamily: 'Quadon Extra Bold',
-    scaleFontFamily: 'Quadon Extra Bold',
     tooltips: {
       enabled: true,
     },
     hover: {
       animationDuration: 1,
     },
+    legend: {
+      display: true,
+    },
+    animation: {
+      duration: 0,
+    },
+    responsive: true,
+    pointLabelFontFamily: 'Quadon Extra Bold',
+    scaleFontFamily: 'Quadon Extra Bold',
     indexAxis: 'y',
     scales: {
       x: {
@@ -86,17 +94,14 @@ const config = {
           zeroLineWidth: 0,
         },
         ticks: {
-          color: (c) => {
-            return 'black';
+          color: ({ tick }) => {
+            return studentsLabelColor.get(tick.label) || STUDENT_LABEL_COLOR;
           },
           fontFamily: "'Open Sans Bold', sans-serif",
           fontSize: 11,
         },
         stacked: true,
       },
-    },
-    legend: {
-      display: true,
     },
   },
 };
@@ -114,7 +119,40 @@ function updateChart(selectedStudents) {
   myChart.update();
 }
 
+// Calculate access avg
+$('#checkAccessFilter').click(function () {
+  if (!this.checked) {
+    applyLabelColorFor(allStudents, STUDENT_LABEL_COLOR);
+    updateChart(getSelectedStudents());
+  }
+});
+
+$('#applyAccessFilter').click(function () {
+  applyAccessFilterForChart();
+  updateChart(getSelectedStudents());
+});
+
+function applyAccessFilterForChart() {
+  const cutPoint = $('#cutPointInput').val();
+  const selectedStudents = getSelectedStudents();
+  const { studentsAbove, studentsBellow } = classifyStudentsByAboveAndBellowFor(
+    cutPoint,
+    selectedStudents
+  );
+  applyLabelColorFor(studentsAbove, STUDENT_ABOVE_POINTCUT_COLOR);
+  applyLabelColorFor(studentsBellow, STUDENT_BELLOW_POINTCUT_COLOR);
+}
+
+function applyLabelColorFor(students, color) {
+  students.forEach(({ name }) => {
+    studentsLabelColor.set(name, color);
+  });
+}
+
 function onStudentSelectionForChart() {
+  if ($('#checkAccessFilter').is(':checked')) {
+    applyAccessFilterForChart();
+  }
   const selectedStudents = getSelectedStudents();
   updateChart(sortStudentsByTotalTimeSpent(selectedStudents));
 }

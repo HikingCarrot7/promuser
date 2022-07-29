@@ -27,14 +27,18 @@ const cy = cytoscape({
     },
   ],
   wheelSensitivity: 0.3,
-  layout: {
+  layout: graphLayout(),
+});
+
+function graphLayout() {
+  return {
     name: 'concentric',
     concentric: function (node) {
       return node.data('level') || 10;
     },
     minNodeSpacing: 50,
-  },
-});
+  };
+}
 
 function createStudentNodes(students) {
   const { min, max } = extractMinAndMaxAvgTimeSpentFrom(students);
@@ -91,6 +95,7 @@ function createEdges(students) {
 
     edges.push(...studentEdges);
   });
+
   return edges;
 }
 
@@ -144,9 +149,9 @@ $('#checkAccessFilter').click(function () {
   }
 });
 
-$('#applyAccessFilter').click(applyAccessFilter);
+$('#applyAccessFilter').click(applyAccessFilterForGraph);
 
-function applyAccessFilter() {
+function applyAccessFilterForGraph() {
   const cutPoint = $('#cutPointInput').val();
   const selectedStudents = getSelectedStudents();
   const { studentsAbove, studentsBellow } = classifyStudentsByAboveAndBellowFor(
@@ -167,6 +172,6 @@ function onStudentSelectionForGraph() {
   const selectedStudents = getSelectedStudents();
   updateGraph(selectedStudents);
   if ($('#checkAccessFilter').is(':checked')) {
-    applyAccessFilter();
+    applyAccessFilterForGraph();
   }
 }
