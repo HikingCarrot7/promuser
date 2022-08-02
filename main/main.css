@@ -1,61 +1,61 @@
 .popover__title {
-    font-size: 24px;
-    text-decoration: none;
-    text-align: center;
-    margin: 0px;
+  font-size: 24px;
+  margin: 0px;
+  text-align: center;
+  text-decoration: none;
 }
 
 .popover__wrapper {
-    position: relative;
-    display: inline-block;
+  display: inline-block;
+  position: relative;
 }
 
 .popover__content {
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    transform: translate(0, 10px);
-    left: -32px;
-    margin-top: 30px;
-    background-color: white;
-    padding: 2px;
-    padding-top: 4px;
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    width: 200px;
-    font-size: 12px;
-    font-weight: normal;
-    border-radius: 3px;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  font-size: 12px;
+  font-weight: normal;
+  left: -32px;
+  margin-top: 30px;
+  opacity: 0;
+  padding: 2px;
+  padding-top: 4px;
+  position: absolute;
+  transform: translate(0, 10px);
+  visibility: hidden;
+  width: 200px;
 }
 
 .popover__content p {
-    margin: 0px;
+  margin: 0px;
 }
 
 .popover__content:before {
-    position: absolute;
-    z-index: -1;
-    content: \"\";
-    right: calc(80% - 10px);
-    top: -8px;
-    border-style: solid;
-    border-width: 0 10px 10px 10px;
-    border-color: transparent transparent white transparent;
-    transition-duration: 0.3s;
-    transition-property: transform;
+  border-color: transparent transparent white transparent;
+  border-style: solid;
+  border-width: 0 10px 10px 10px;
+  content: \"\";
+  position: absolute;
+  right: calc(80% - 10px);
+  top: -8px;
+  transition-duration: 0.3s;
+  transition-property: transform;
+  z-index: -1;
 }
 
 .popover__wrapper:hover .popover__content {
-    z-index: 10;
-    opacity: 1;
-    visibility: visible;
-    transform: translate(0, -20px);
-    transition: all 0.5s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+  opacity: 1;
+  transform: translate(0, -20px);
+  transition: all 0.5s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+  visibility: visible;
+  z-index: 10;
 }
 
 .popover__message {
-    text-align: center;
+  text-align: center;
 }
 
 .image a img {
-    width: 100%;
+  width: 100%;
 }
