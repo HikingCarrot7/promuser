@@ -1,0 +1,14 @@
+body {
+  height: 100vh;
+  min-height: 100vh;
+}
+
+#myNetworkGraph,
+#myNetworkBar {
+  height: 100%;
+  width: 100%;
+}
+
+#graphic-wrapper {
+  height: calc(100vh - 55px) !important;
+}
