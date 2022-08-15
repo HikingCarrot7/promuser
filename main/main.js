@@ -219,7 +219,7 @@ function showTableActivitiesPerInterval() {
   setEmptyTable('interval');
 }
 
-function updateTableActivitiesPerInterval() {
+function updateTableActivitiesPerInterval(courseId) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {

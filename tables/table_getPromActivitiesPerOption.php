@@ -11,7 +11,7 @@ $user_id = $USER->id;
 
 function getPromActivityPerDayPerAlumno($DB, $course_id, $idAlumno,$firstLastNames,$user_id){
     $idCourse = $course_id;
-    $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$idAlumno.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated ASC");
+    $resultado = getLogs ($idAlumno, $user_id);
 
     $anteriorIgual = false;
     $anteriorCursoDistinto = true;
@@ -224,9 +224,11 @@ function getPromActivityPerDayPerAlumno($DB, $course_id, $idAlumno,$firstLastNam
     
     return $finalTable;
 }
+
+
 function getPromActivityPerAlumno($DB, $course_id, $idAlumno,$firstLastNames,$user_id){
     $idCourse = $course_id;
-    $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$idAlumno.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated ASC");
+    $resultado = getLogs ($idAlumno, $user_id);
 
 
     $anteriorIgual = false;
@@ -415,8 +417,8 @@ function getPromActivityPerAlumno($DB, $course_id, $idAlumno,$firstLastNames,$us
 $sumaPromediosGrupo = 0;
 $arrayTiemposAlumnos = array();
 
-$id_role_student = $DB->get_record_sql("SELECT id FROM mdl_role WHERE shortname = 'student';")->id;
-$contextId = $DB->get_record_sql("SELECT id FROM mdl_context WHERE contextlevel = 50 AND instanceid = ".$course_id.";")->id;
+$id_role_student = getStudentRoleId ();
+$contextId = getCourseContextId ();
 
 $resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
 GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
@@ -441,7 +443,7 @@ foreach ($resultado as $keyUser=>$rs){
         if($option_selected == "interval"){
             $matrizResultado = getPromActivityPerAlumno($DB, $course_id, $rs->userid,$namesComplete,$user_id);
             //FIRST DATE
-            $rows = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$rs->userid.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated ASC LIMIT 1");
+            $rows = getLogs ($rs->userid, $user_id);
             foreach($rows as $row=>$row_s){
                 if($first_date == '') {
                     $first_date = new DateTime(date('Y-m-d H:i:s',$row_s->timecreated));

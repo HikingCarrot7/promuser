@@ -27,7 +27,7 @@ class block_promuser extends block_base {
     include('database/Queries.php');
     include('views/activitiesByInterval.php');
     include('views/promTimeByUser.php');
-    //include('main/main.php');
+    include('main/main.php');
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,25 +45,19 @@ class block_promuser extends block_base {
 
 
     //Se genera el código HTML para el select de alumnos
-    /*$selectOptions = "";
+    $selectOptions = "";
     foreach ($usuarios as $aUser) {
       $selectOptions .= '<option value="' . $aUser->id . '">' . $aUser->firstname . " " . $aUser->lastname . "</option>";
-    }*/
+    }
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    //$contentPromUser = str_replace('%selectOptions%', $selectOptions, $contentPromUser);
+    $contentPromUser = str_replace('%selectOptions%', $selectOptions, $contentPromUser);
 
-    $lineas = file('main/main.php');
-    $output = "";
-    foreach ($lineas as $line_num => $linea) { 
-      //recorremos todas las líneas HTML devueltas por la página
-      $output.= "Line #{$line_num} : " . htmlspecialchars($linea) . "\n";
-    }
 
     //Se retorna el contenido declarado para el bloque de PromUser
-    
-    $this->content->text = $output;
+      
+    $this->content->text = $contentPromUser;
     return $this->content;
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
   }

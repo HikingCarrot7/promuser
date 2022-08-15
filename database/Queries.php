@@ -37,4 +37,15 @@ function getCourseId () {
     return $COURSE->id;
 }
 
+function getLogs ($idAlumno, $user_id) {
+    global $DB;
+    return $DB->get_records_sql("
+        SELECT * 
+        FROM mdl_logstore_standard_log 
+        WHERE (userid = ".$idAlumno.") AND 
+            (target != 'config_log') AND 
+            (userid <> ".$user_id.") 
+        ORDER BY timecreated ASC");
+}
+
 ?>

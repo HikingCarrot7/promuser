@@ -51,11 +51,7 @@ $contentPromUser = <<< EOT
     <select style="max-width: 100%; min-width: 100%;" id="selectUserId">
 
 
-    <?php
-    foreach (getUsers() as $aUser) {
-    echo '<option value="' . $aUser->id . '">' . $aUser->firstname . " " . $aUser->lastname . "</option>";
-    }
-    ?>
+    %selectOptions%
 
 
     </select>
