@@ -93,5 +93,16 @@ function getAccesses ($idAlumno, $course_id) {
     );
 }
 
-
+function getUserData ($idUser) {
+    global $DB;
+    return $DB->get_record_sql("
+        SELECT 
+            id, 
+            firstname, 
+            lastname 
+        FROM 
+            mdl_user 
+        WHERE 
+            (id = " . $idUser . ")");
+}
 ?>

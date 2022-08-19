@@ -1,21 +1,20 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $DB;
 global $USER;
+include('../database/Queries.php');
 $variableCSV = array();
 
 function getPromActivitiesPerOption($option) {
-  global $DB;
   global $USER;
 
-  $id_role_student = $DB->get_record_sql("SELECT id FROM mdl_role WHERE shortname = 'student';")->id;
-  $contextId = $DB->get_record_sql("SELECT id FROM mdl_context WHERE contextlevel = 50 AND instanceid = " . $_GET['idCourse'] . ";")->id;
-
-  $resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-    GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-    WHERE user_role.by_role = 1 AND user_role.roles = " . $id_role_student . " AND user_role.contextid = " . $contextId . ") data_role
-    INNER JOIN mdl_user users ON data_role.userid = users.id;");
+  $course_id = $_GET['idCourse'];
+  //Se obtiene el rol de estudiante con una función del archivo Queries.php
+  $id_role_student = getStudentRoleId ();
+  //Se obtiene el contextId con una función del archivo Queries.php 
+  $contextId = getCourseContextId ($course_id);
+  //Se obtienen los usuarios de este curso con una función del archivo Queries.php
+  $resultado = getUsersInThisCourse($course_id);
 
 
   foreach ($resultado as $keyUser => $rs) {
@@ -31,13 +30,12 @@ function getPromActivitiesPerOption($option) {
 }
 
 function getPromActivityPerDayPerAlumno($idAlumno, $firstLastNames) {
-  global $DB;
   global $USER;
   global $variableCSV;
 
   $idCourse = $_GET['idCourse'];
-  $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = " . $idAlumno . ") AND (target != 'config_log') AND (userid <> " . $USER->id . ") ORDER BY timecreated ASC");
-
+  $extra_indications = "ORDER BY timecreated ASC";
+  $resultado = getLogs($idAlumno, $USER->id, $extra_indications);
 
   $anteriorIgual = false;
   $anteriorCursoDistinto = true;

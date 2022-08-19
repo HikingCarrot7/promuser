@@ -1,12 +1,14 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $DB;
 global $COURSE;
 global $USER;
+include('../database/Queries.php');
 
 $idCourse = $_GET['courseVar'];
-$resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = " . $_GET['var'] . ") AND (target != 'config_log') AND (userid <> " . $USER->id . ") ORDER BY timecreated ASC");
+$idUser = $_GET['var'];
+$extra_indications = "ORDER BY timecreated ASC";
+$resultado = getLogs($idUser, $USER->id, $extra_indications);
 
 
 $anteriorIgual = false;

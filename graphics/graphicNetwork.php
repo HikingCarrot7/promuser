@@ -1,12 +1,13 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $DB;
 global $COURSE;
 global $USER;
+include('../database/Queries.php');
 
 $idCourse = $_GET['courseVar'];
-$user = $DB->get_record_sql("SELECT id, firstname, lastname FROM mdl_user where (id = " . $_GET['var'] . ")");
+$idUser = $_GET['var'];
+$user = getUserData($idUser);
 $total_sum = 0;
 $counter_record = 0;
 $counter_id = 2;
