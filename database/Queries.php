@@ -67,6 +67,31 @@ function getUsersInThisCourse ($course_id) {
                 user_role.contextid = ".getCourseContextId ($course_id)."
         ) AS data_role
         INNER JOIN mdl_user users ON data_role.userid = users.id;");
-
 }
+
+function getAccesses ($idAlumno, $course_id) {
+    global $DB;
+    return $DB->get_records_sql("
+        SELECT 
+            * 
+        FROM 
+            mdl_logstore_standard_log 
+        WHERE 
+            (userid = ".$idAlumno." 
+                AND 
+            action = 'loggedin') 
+                    OR 
+            (target = 'course' 
+                AND 
+            action = 'viewed' 
+                AND 
+            courseid = ".$course_id." 
+                AND 
+            userid = ".$idAlumno.") 
+        ORDER BY 
+            timecreated ASC;"
+    );
+}
+
+
 ?>

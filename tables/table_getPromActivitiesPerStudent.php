@@ -1,16 +1,16 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $DB;
 global $COURSE;
 global $USER;
 
 $course_id = $_POST['idCourse'];
 $user_id = $USER->id;
 
-function getPromActivityPerDayPerAlumno($DB, $idAlumno,$firstLastNames, $course_id, $user_id){
+function getPromActivityPerDayPerAlumno($idAlumno,$firstLastNames, $course_id, $user_id){
     $idCourse = $course_id;
-    $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid=".$idAlumno.") AND (target != 'config_log') ORDER BY timecreated ASC");
+    $extra_indications = "ORDER BY timecreated ASC";
+    $resultado = getLogs($idAlumno, $user_id, $extra_indications);
 
     $anteriorIgual = false;
     $anteriorCursoDistinto = true;
@@ -219,9 +219,9 @@ function getPromActivityPerDayPerAlumno($DB, $idAlumno,$firstLastNames, $course_
     return $finalTable;
 }
 
-function getNumberAccessPerAlumno($DB, $idAlumno, $firstLastNames, $course_id, $user_id){
+function getNumberAccessPerAlumno($idAlumno, $firstLastNames, $course_id, $user_id){
     $idCourse = $course_id;
-    $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$idAlumno." AND action = 'loggedin') OR (target = 'course' and action = 'viewed' and courseid = ".$idCourse." and userid = ".$idAlumno.") ORDER BY timecreated ASC;");
+    $resultado = getAccesses($idAlumno, $course_id);
     
     $sumAccess = 0;
     $loggedin = false;
@@ -243,20 +243,17 @@ function getNumberAccessPerAlumno($DB, $idAlumno, $firstLastNames, $course_id, $
     return $sumAccess;
 }
 
-function getPromByStudent($DB, $course_id, $user_id) {
+function getPromByStudent($course_id, $user_id) {
     $arrayTiemposAlumnos = array();
     
-    $id_role_student = $DB->get_record_sql("SELECT id FROM mdl_role WHERE shortname = 'student';")->id;
-    $contextId = $DB->get_record_sql("SELECT id FROM mdl_context WHERE contextlevel = 50 AND instanceid = ".$course_id.";")->id;
+    $id_role_student = getStudentRoleId ();
+    $contextId = getCourseContextId ($course_id);
     
-    $resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-    GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-    WHERE user_role.by_role = 1 AND user_role.roles = ".$id_role_student." AND user_role.contextid = ".$contextId.") data_role
-    INNER JOIN mdl_user users ON data_role.userid = users.id;");
+    $resultado = getUsersInThisCourse($course_id);
 
     foreach ($resultado as $rs){
         if($user_id != $rs->userid) {
-            $promedioTiempoAlumno = getPromPerAlumnoByDay($DB, $rs->userid, $course_id, $user_id);             
+            $promedioTiempoAlumno = getPromPerAlumnoByDay($rs->userid, $course_id, $user_id);             
             array_push($arrayTiemposAlumnos,$promedioTiempoAlumno);
         }
     }
@@ -264,9 +261,10 @@ function getPromByStudent($DB, $course_id, $user_id) {
     return $arrayTiemposAlumnos;
 }
 
-function getPromPerAlumnoByDay($DB, $idAlumno, $course_id, $user_id){
+function getPromPerAlumnoByDay($idAlumno, $course_id, $user_id){
     $idCourse = $course_id;
-    $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$idAlumno.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated ASC");
+    $extra_indications = "ORDER BY timecreated ASC";
+    $resultado = getLogs ($idAlumno, $user_id, $extra_indications);
 
     $anteriorIgual = false;
     $anteriorCursoDistinto = true;
@@ -393,17 +391,17 @@ function array_combine2($arr1, $arr2) {
     return array_combine(array_slice($arr1, 0, $count), array_slice($arr2, 0, $count));
 }
 
+include ('../database/Queries.php');
 
 $sumaPromediosGrupo = 0;
 $arrayTiemposAlumnos = array();; 
 
-$id_role_student = $DB->get_record_sql("SELECT id FROM mdl_role WHERE shortname = 'student';")->id;
-$contextId = $DB->get_record_sql("SELECT id FROM mdl_context WHERE contextlevel = 50 AND instanceid = ".$course_id.";")->id;
-
-$resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-WHERE user_role.by_role = 1 AND user_role.roles = ".$id_role_student." AND user_role.contextid = ".$contextId.") data_role
-INNER JOIN mdl_user users ON data_role.userid = users.id;");
+//Se obtiene el rol de estudiante con una función del archivo Queries.php
+$id_role_student = getStudentRoleId ();
+//Se obtiene el contextId con una función del archivo Queries.php 
+$contextId = getCourseContextId ($course_id);
+//Se obtienen los usuarios de este curso con una función del archivo Queries.php
+$resultado = getUsersInThisCourse($course_id);
 
 
 $activityFound = false;
@@ -423,9 +421,9 @@ foreach ($resultado as $keyUser=>$rs){
 
         $namesComplete = $rs->firstname." ".$rs->lastname;
         $namesComplete = str_replace(" ",",",$namesComplete);
-        $matrizResultado = getPromActivityPerDayPerAlumno($DB, $rs->userid, $namesComplete, $course_id, $user_id);
+        $matrizResultado = getPromActivityPerDayPerAlumno($rs->userid, $namesComplete, $course_id, $user_id);
         
-        $numberAccess = getNumberAccessPerAlumno($DB, $rs->userid, $namesComplete, $course_id, $user_id);
+        $numberAccess = getNumberAccessPerAlumno($rs->userid, $namesComplete, $course_id, $user_id);
 
         $tablaFinal = array();
         $promFinal = 0;
@@ -442,7 +440,7 @@ $totalQuantities = array();
 $totalValues = array_combine($students, $studentActivitiesProms);
 $totalQuantities = array_combine($students, $quantities);
 
-$promTimes = getPromByStudent($DB, $course_id, $user_id);
+$promTimes = getPromByStudent($course_id, $user_id);
 
 $index_number = 0;
 foreach($totalValues as $index=>$value){
