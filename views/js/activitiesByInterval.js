@@ -11,7 +11,7 @@ function setEmptyTable(type){
       data_json = JSON.parse(localStorage.getItem("PromActivitiesPerOptionInterval"));
       $('.modal-title').text('Tiempo promedio del grupo por actividad');
       let buttonUpdate = document.getElementById('updateTable');
-      buttonUpdate.onclick = updateTableActivitiesPerInterval;
+      buttonUpdate.onclick = updateTableActivitiesPerInterval();
     }
     if(data_json == null) {
       $('#tableDataProm').append("<tr><th>Sin datos</th><th>Presione sobre 'Actualizar datos' para continuar...</th></tr>");

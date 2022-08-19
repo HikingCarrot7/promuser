@@ -21,6 +21,9 @@ class block_promuser extends block_base {
       return $this->content;
     }
     $this->content = new stdClass;
+    global $COURSE;
+    $courseid = $COURSE->id;
+
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     //Se incluyen las vistas tipo "modal"
@@ -33,11 +36,11 @@ class block_promuser extends block_base {
 
 
     //Se imprimen los usuarios obtenidos
-    $usuarios = getUsers();
+    $usuarios = getUsers($courseid);
     echo ('<script>console.log(' . json_encode($usuarios) . ')</script>');
 
     //Se declara la variable courseId para el JavaScript
-    echo ("<script> var courseId = " . getCourseId() . "</script>");
+    echo ("<script> var courseId = " . $courseid . "</script>");
 
     //Se genera el enlace con el CSS correspondiente
     echo ('<link rel="stylesheet" href="../blocks/promuser/main/main.css">');

@@ -1,17 +1,17 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $DB;
-global $COURSE;
 global $USER;
 
 $course_id = $_POST['idCourse'];
 $option_selected = $_POST['option'];
 $user_id = $USER->id;
 
-function getPromActivityPerDayPerAlumno($DB, $course_id, $idAlumno,$firstLastNames,$user_id){
+
+function getPromActivityPerDayPerAlumno($course_id, $idAlumno,$firstLastNames,$user_id){
     $idCourse = $course_id;
-    $resultado = getLogs ($idAlumno, $user_id);
+    $extra_indications = "ORDER BY timecreated ASC";
+    $resultado = getLogs ($idAlumno, $user_id, $extra_indications);
 
     $anteriorIgual = false;
     $anteriorCursoDistinto = true;
@@ -226,9 +226,10 @@ function getPromActivityPerDayPerAlumno($DB, $course_id, $idAlumno,$firstLastNam
 }
 
 
-function getPromActivityPerAlumno($DB, $course_id, $idAlumno,$firstLastNames,$user_id){
+function getPromActivityPerAlumno($course_id, $idAlumno,$firstLastNames,$user_id){
     $idCourse = $course_id;
-    $resultado = getLogs ($idAlumno, $user_id);
+    $extra_indications = "ORDER BY timecreated ASC";
+    $resultado = getLogs ($idAlumno, $user_id, $extra_indications);
 
 
     $anteriorIgual = false;
@@ -414,16 +415,18 @@ function getPromActivityPerAlumno($DB, $course_id, $idAlumno,$firstLastNames,$us
     return $finalTable;
 }
 
+//Se incluye el archivo que realizará las consultas a la BD
+include('../database/Queries.php');
+
 $sumaPromediosGrupo = 0;
 $arrayTiemposAlumnos = array();
 
+//Se obtiene el rol de estudiante con una función del archivo Queries.php
 $id_role_student = getStudentRoleId ();
-$contextId = getCourseContextId ();
-
-$resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-WHERE user_role.by_role = 1 AND user_role.roles = ".$id_role_student." AND user_role.contextid = ".$contextId.") data_role
-INNER JOIN mdl_user users ON data_role.userid = users.id;");
+//Se obtiene el contextId con una función del archivo Queries.php 
+$contextId = getCourseContextId ($course_id);
+//Se obtienen los usuarios de este curso con una función del archivo Queries.php
+$resultado = getUsersInThisCourse($course_id);
 
 $activities = array();
 $promActivity = array();
@@ -441,9 +444,10 @@ foreach ($resultado as $keyUser=>$rs){
         $namesComplete = str_replace(" ",",",$namesComplete);
         
         if($option_selected == "interval"){
-            $matrizResultado = getPromActivityPerAlumno($DB, $course_id, $rs->userid,$namesComplete,$user_id);
+            $matrizResultado = getPromActivityPerAlumno($course_id, $rs->userid,$namesComplete,$user_id);
             //FIRST DATE
-            $rows = getLogs ($rs->userid, $user_id);
+            $extra_indications = "ORDER BY timecreated ASC LIMIT 1";
+            $rows = getLogs ($rs->userid, $user_id, $extra_indications);
             foreach($rows as $row=>$row_s){
                 if($first_date == '') {
                     $first_date = new DateTime(date('Y-m-d H:i:s',$row_s->timecreated));
@@ -455,7 +459,8 @@ foreach ($resultado as $keyUser=>$rs){
                 }
             }
             // LAST DATE
-            $rows = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$rs->userid.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated DESC LIMIT 1");
+            $extra_indications = "ORDER BY timecreated DESC LIMIT 1";
+            $rows = getLogs ($rs->userid, $user_id, $extra_indications);
             foreach($rows as $row=>$row_s){
                 if($last_date == '') {
                     $last_date = new DateTime(date('Y-m-d H:i:s',$row_s->timecreated));
@@ -468,9 +473,10 @@ foreach ($resultado as $keyUser=>$rs){
             }
         }else{
             if($option_selected == "day"){
-                $matrizResultado = getPromActivityPerDayPerAlumno($DB, $course_id, $rs->userid,$namesComplete,$user_id);
+                $matrizResultado = getPromActivityPerDayPerAlumno($course_id, $rs->userid,$namesComplete,$user_id);
                 //FIRST_DATE
-                $rows = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$rs->userid.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated ASC LIMIT 1");
+                $extra_indications = "ORDER BY timecreated ASC LIMIT 1";
+                $rows = getLogs ($rs->userid, $user_id, $extra_indications);
                 foreach($rows as $row=>$row_s){
                     if($first_date == '') {
                         $first_date = new DateTime(date('Y-m-d H:i:s',$row_s->timecreated));
@@ -482,7 +488,8 @@ foreach ($resultado as $keyUser=>$rs){
                     }
                 }
                 //LAST_DATE
-                $rows = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = ".$rs->userid.") AND (target != 'config_log') AND (userid <> ".$user_id.") ORDER BY timecreated DESC LIMIT 1");
+                $extra_indications = "ORDER BY timecreated DESC LIMIT 1";
+                $rows = getLogs ($rs->userid, $user_id, $extra_indications);
                 foreach($rows as $row=>$row_s){
                     if($last_date == '') {
                         $last_date = new DateTime(date('Y-m-d H:i:s',$row_s->timecreated));
