@@ -14,6 +14,10 @@ const cy = cytoscape({
       style: {
         shape: 'circle',
         'background-color': 'data(color)',
+        'background-image': 'data(svg)',
+        'border-opacity': '1',
+        'border-width': '1px',
+        border: '1px solid black',
         label: 'data(label)',
         width: 'data(diameter)',
         height: 'data(diameter)',
@@ -47,6 +51,7 @@ function createStudentNodes(students) {
       data: {
         id: name,
         color: STUDENT_NODE_COLOR,
+        svg: 'student-icon.svg',
         label: name,
         avgTimeSpentLabel: secondsToHms(avgTimeSpent),
         diameter: calculateDiameterFor(avgTimeSpent, min, max),
@@ -146,13 +151,17 @@ $('#checkAccessFilter').click(function () {
     $('#cutPointInput').val(accessAvg);
   } else {
     applyBgColorFor(allStudents, STUDENT_NODE_COLOR);
+    setCutPoint('');
   }
 });
 
-$('#applyAccessFilter').click(applyAccessFilterForGraph);
-
-function applyAccessFilterForGraph() {
+$('#applyAccessFilter').click(function () {
   const cutPoint = $('#cutPointInput').val();
+  applyAccessFilterForGraph(cutPoint);
+  setCutPoint(cutPoint);
+});
+
+function applyAccessFilterForGraph(cutPoint) {
   const selectedStudents = getSelectedStudents();
   const { studentsAbove, studentsBellow } = classifyStudentsByAboveAndBellowFor(
     cutPoint,
@@ -160,6 +169,14 @@ function applyAccessFilterForGraph() {
   );
   applyBgColorFor(studentsAbove, STUDENT_ABOVE_POINTCUT_COLOR);
   applyBgColorFor(studentsBellow, STUDENT_BELLOW_POINTCUT_COLOR);
+}
+
+function setCutPoint(cutPoint) {
+  if (cutPoint) {
+    $('#selectedCutPoint').text(`Punto de corte: ${cutPoint}`);
+  } else {
+    $('#selectedCutPoint').text('');
+  }
 }
 
 function applyBgColorFor(students, color) {

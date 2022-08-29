@@ -1,4 +1,4 @@
-const STUDENT_NODE_COLOR = 'blue';
+const STUDENT_NODE_COLOR = '#dedede';
 const STUDENT_LABEL_COLOR = 'black';
 
 const STUDENT_ABOVE_POINTCUT_COLOR = '#28A745';
