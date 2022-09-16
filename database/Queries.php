@@ -44,6 +44,38 @@ function getLogs ($idAlumno, $user_id, $extra_indications) {
         );
 }
 
+
+
+CLASE GRUPO {
+
+    setAlumnos();
+
+    getAlumnos();
+
+    getAlumnosId(){
+        return abreArrayYObtenSoloLosID();
+    };
+
+}
+
+CLASE ALUMNO {
+
+    $id;
+    $prom;
+    $logs;
+    $promByDay;
+    $promByActivity;
+
+
+    calculateProm();
+
+    calculatePromByDay();
+
+    
+}
+
+
+
 function getUsersInThisCourse ($course_id) {
     global $DB;
     return $DB->get_records_sql("

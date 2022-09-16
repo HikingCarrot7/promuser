@@ -3,6 +3,7 @@ require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
 global $USER;
 include('../database/Queries.php');
+include('../database/FilesChecker.php');
 $variableCSV = array();
 
 function getPromByGroupPerInterval() {
@@ -34,7 +35,7 @@ function getPromPerAlumno($idAlumno, $firstLastNames) {
 
   $idCourse = $_GET['idCourse'];
   $extra_indications = "ORDER BY timecreated ASC";
-  $resultado = getLogs($idAlumno, $USER->id, $extra_indications);
+  $resultado = loadLogsFileASC($idAlumno, $USER->id, $extra_indications);
 
   $anteriorIgual = false;
   $anteriorCursoDistinto = true;

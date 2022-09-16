@@ -4,11 +4,12 @@ defined('MOODLE_INTERNAL') || die();
 global $COURSE;
 global $USER;
 include('../database/Queries.php');
+include('../database/FilesChecker.php');
 
 $idCourse = $_GET['courseVar'];
 $idUser = $_GET['var'];
 $extra_indications = "ORDER BY timecreated ASC";
-$resultado = getLogs($idUser, $USER->id, $extra_indications);
+$resultado = loadLogsFileASC($idUser, $USER->id, $extra_indications);
 
 $anteriorIgual = false;
 $anteriorCursoDistinto = true;

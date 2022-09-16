@@ -2,13 +2,13 @@ function setEmptyTable(type){
     $('#tableDataProm').html("");
     let data_json = null;
     if(type == 'day'){
-      data_json = JSON.parse(localStorage.getItem("PromActivitiesPerOptionDay"));
+      //data_json = JSON.parse(localStorage.getItem("PromActivitiesPerOptionDay"));
       $('.modal-title').text('Tiempo promedio del grupo por día');
       let buttonUpdate = document.getElementById('updateTable');
       buttonUpdate.onclick = updateTableActivitiesPerDay;
     }
     if(type == 'interval') {
-      data_json = JSON.parse(localStorage.getItem("PromActivitiesPerOptionInterval"));
+      //data_json = JSON.parse(localStorage.getItem("PromActivitiesPerOptionInterval"));
       $('.modal-title').text('Tiempo promedio del grupo por actividad');
       let buttonUpdate = document.getElementById('updateTable');
       buttonUpdate.onclick = updateTableActivitiesPerInterval();

@@ -3,6 +3,7 @@ require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
 global $USER;
 include('../database/Queries.php');
+include('../database/FilesChecker.php');
 
 function getPromByGroupPerInterval() {
   global $USER;
@@ -67,7 +68,7 @@ function getPromPerAlumno($idAlumno) {
 
   $idCourse = $_POST['idCourse'];
   $extra_indications = "ORDER BY timecreated ASC";
-  $resultado = getLogs ($idAlumno, $USER->id, $extra_indications);
+  $resultado = loadLogsFileASC($idAlumno, $USER->id, $extra_indications);
 
 
   $anteriorIgual = false;
@@ -138,7 +139,7 @@ function getPromPerAlumnoByDay($idAlumno) {
 
   $idCourse = $_POST['idCourse'];
   $extra_indications = "ORDER BY timecreated ASC";
-  $resultado = getLogs ($idAlumno, $USER->id, $extra_indications);
+  $resultado = loadLogsFileASC($idAlumno, $USER->id, $extra_indications);
 
 
   $anteriorIgual = false;
@@ -261,11 +262,20 @@ function getPromPerAlumnoByDay($idAlumno) {
   return $valorTotal;
 }
 
-$times = array();
+function generateTimes () {
 
-$segundos = getPromByGroupPerInterval();
-$segundos1 = getPromByGroupPerDay();
-array_push($times, $segundos);
-array_push($times, $segundos1);
+  $times = array();
+
+  $segundos = getPromByGroupPerInterval();
+  $segundos1 = getPromByGroupPerDay();
+  array_push($times, $segundos);
+  array_push($times, $segundos1);
+
+  return $times;
+}
+
+$times = loadTimes();
 
 echo json_encode($times);
+
+?>
