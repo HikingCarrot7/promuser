@@ -22,7 +22,7 @@ class block_promuser extends block_base {
     }
     $this->content = new stdClass;
     global $COURSE;
-    $courseid = $COURSE->id;
+    global $USER;
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,16 +35,17 @@ class block_promuser extends block_base {
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
     //Se declara la variable courseId para el JavaScript
-    echo ("<script> var courseId = " . $courseid . "</script>");
-
+    echo ("<script> var courseId = " . $COURSE->id . "</script>");
+    
     //Se genera el enlace con el CSS correspondiente
     echo ('<link rel="stylesheet" href="../blocks/promuser/main/main.css">');
     //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    $users = json_decode(loadUsersFile($courseid));
+    initializeContext($COURSE->id,$USER->id);
     
+    $users = loadUsers();
+    //echo ("<script> console.log(" . loadUsers() . ")</script>");
 
     //Se genera el código HTML para el select de alumnos
     $selectOptions = "";

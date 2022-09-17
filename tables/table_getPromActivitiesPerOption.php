@@ -13,7 +13,7 @@ $user_id = $USER->id;
 function getPromActivityPerAlumno($course_id, $idAlumno,$firstLastNames,$user_id){
     $idCourse = $course_id;
     $extra_indications = "ORDER BY timecreated ASC";
-    $resultado = loadLogsFileASC ($idAlumno, $user_id, $extra_indications);
+    $resultado = loadLogs($idAlumno);
 
 
     $anteriorIgual = false;
@@ -203,11 +203,11 @@ $sumaPromediosGrupo = 0;
 $arrayTiemposAlumnos = array();
 
 //Se obtiene el rol de estudiante con una función del archivo Queries.php
-$id_role_student = getStudentRoleId ();
+$id_role_student = loadStudentRoleId();
 //Se obtiene el contextId con una función del archivo Queries.php 
-$contextId = getCourseContextId ($course_id);
+$contextId = loadCourseContextId();
 //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-$resultado = getUsersInThisCourse($course_id);
+$resultado = loadUsers();
 
 $activities = array();
 $promActivity = array();
@@ -342,6 +342,8 @@ $resultTable = array();
 $resultTable = array_combine($activities, $tablaFinal);
 $resultTable['first_date'] = $first_date;
 $resultTable['last_date'] = $last_date;
+
+
 
 echo json_encode($resultTable);
 

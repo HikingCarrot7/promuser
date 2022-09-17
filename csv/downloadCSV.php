@@ -13,7 +13,7 @@ function getPromActivitiesPerOption($option) {
   //Se obtiene el rol de estudiante con una función del archivo Queries.php
   $id_role_student = getStudentRoleId ();
   //Se obtiene el contextId con una función del archivo Queries.php 
-  $contextId = getCourseContextId ($course_id);
+  $contextId = loadCourseContextId();
   //Se obtienen los usuarios de este curso con una función del archivo Queries.php
   $resultado = getUsersInThisCourse($course_id);
 
@@ -36,7 +36,7 @@ function getPromActivityPerDayPerAlumno($idAlumno, $firstLastNames) {
 
   $idCourse = $_GET['idCourse'];
   $extra_indications = "ORDER BY timecreated ASC";
-  $resultado = loadLogsFileASC($idAlumno, $USER->id, $extra_indications);
+  $resultado = loadLogs ($idAlumno);
 
   $anteriorIgual = false;
   $anteriorCursoDistinto = true;

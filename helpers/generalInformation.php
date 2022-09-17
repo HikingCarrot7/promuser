@@ -15,7 +15,7 @@ function getPromByGroupPerInterval() {
   //Se obtiene el rol de estudiante con una función del archivo Queries.php
   $id_role_student = getStudentRoleId ();
   //Se obtiene el contextId con una función del archivo Queries.php 
-  $contextId = getCourseContextId ($course_id);
+  $contextId = loadCourseContextId();
   //Se obtienen los usuarios de este curso con una función del archivo Queries.php
   $resultado = getUsersInThisCourse($course_id);
 
@@ -35,8 +35,8 @@ function getPromByGroupPerInterval() {
 }
 
 function getPromByGroupPerDay() {
-  global $USER;
-  $course_id = $_POST['idCourse'];
+  $course_id = loadCourseId();
+  $professorId = loadProfessorId();
 
   $sumaPromediosGrupo = 0;
   $arrayTiemposAlumnos = array();
@@ -44,13 +44,13 @@ function getPromByGroupPerDay() {
   //Se obtiene el rol de estudiante con una función del archivo Queries.php
   $id_role_student = getStudentRoleId ();
   //Se obtiene el contextId con una función del archivo Queries.php 
-  $contextId = getCourseContextId ($course_id);
+  $contextId = loadCourseContextId();
   //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-  $resultado = getUsersInThisCourse($course_id);
+  $users = loadUsers();
 
-  foreach ($resultado as $rs) {
-    if ($USER->id != $rs->userid) {
-      $promedioTiempoAlumno = getPromPerAlumnoByDay($rs->userid);
+  foreach ($users as $aUser) {
+    if ($professorId != $aUser->userid) {
+      $promedioTiempoAlumno = getPromPerAlumnoByDay($aUser->userid);
       $sumaPromediosGrupo += $promedioTiempoAlumno;
       array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
     }
@@ -68,7 +68,7 @@ function getPromPerAlumno($idAlumno) {
 
   $idCourse = $_POST['idCourse'];
   $extra_indications = "ORDER BY timecreated ASC";
-  $resultado = loadLogsFileASC($idAlumno, $USER->id, $extra_indications);
+  $resultado = loadLogs ($idAlumno);
 
 
   $anteriorIgual = false;
@@ -139,7 +139,7 @@ function getPromPerAlumnoByDay($idAlumno) {
 
   $idCourse = $_POST['idCourse'];
   $extra_indications = "ORDER BY timecreated ASC";
-  $resultado = loadLogsFileASC($idAlumno, $USER->id, $extra_indications);
+  $resultado = loadLogs ($idAlumno);
 
 
   $anteriorIgual = false;
@@ -274,7 +274,7 @@ function generateTimes () {
   return $times;
 }
 
-$times = loadTimes();
+$times = generateTimes();
 
 echo json_encode($times);
 

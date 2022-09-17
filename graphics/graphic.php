@@ -9,7 +9,7 @@ include('../database/FilesChecker.php');
 $idCourse = $_GET['courseVar'];
 $idUser = $_GET['var'];
 $extra_indications = "ORDER BY timecreated ASC";
-$resultado = loadLogsFileASC($idUser, $USER->id, $extra_indications);
+$resultado = loadLogs($idUser);
 
 $anteriorIgual = false;
 $anteriorCursoDistinto = true;

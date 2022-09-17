@@ -20,17 +20,6 @@ function getCourseContextId ($course_id) {
     )->id;
 }
 
-function getUsers ($course_id) {
-    global $DB;
-    return $DB->get_records_sql("
-        SELECT id, userid, username, firstname, lastname, email 
-        FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-        GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-        WHERE user_role.by_role = 1 AND user_role.roles = " . getStudentRoleId() . " AND user_role.contextid = " . getCourseContextId($course_id) . ") data_role
-        INNER JOIN mdl_user users ON data_role.userid = users.id;
-    ");
-}
-
 function getLogs ($idAlumno, $user_id, $extra_indications) {
     global $DB;
     return $DB->get_records_sql("
@@ -44,38 +33,6 @@ function getLogs ($idAlumno, $user_id, $extra_indications) {
         );
 }
 
-
-
-CLASE GRUPO {
-
-    setAlumnos();
-
-    getAlumnos();
-
-    getAlumnosId(){
-        return abreArrayYObtenSoloLosID();
-    };
-
-}
-
-CLASE ALUMNO {
-
-    $id;
-    $prom;
-    $logs;
-    $promByDay;
-    $promByActivity;
-
-
-    calculateProm();
-
-    calculatePromByDay();
-
-    
-}
-
-
-
 function getUsersInThisCourse ($course_id) {
     global $DB;
     return $DB->get_records_sql("
@@ -88,8 +45,11 @@ function getUsersInThisCourse ($course_id) {
                     contextid,
                     COUNT(*) AS by_role,
                     GROUP_CONCAT(roleid) AS roles 
-                FROM mdl_role_assignments 
-                GROUP BY userid, contextid
+                FROM 
+                    mdl_role_assignments 
+                GROUP BY 
+                    userid, 
+                    contextid
             ) AS user_role
             WHERE 
                 user_role.by_role = 1 
@@ -98,7 +58,8 @@ function getUsersInThisCourse ($course_id) {
                     AND 
                 user_role.contextid = ".getCourseContextId ($course_id)."
         ) AS data_role
-        INNER JOIN mdl_user users ON data_role.userid = users.id;");
+            INNER JOIN 
+        mdl_user users ON data_role.userid = users.id;");
 }
 
 function getAccesses ($idAlumno, $course_id) {

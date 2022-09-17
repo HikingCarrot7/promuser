@@ -180,6 +180,7 @@ function showGraphicClassNetworks() {
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       setPromActivitiesPerStudentTable(JSON.parse(this.responseText));
+      console.log(JSON.parse(this.responseText));
       document.getElementById('graphic-class').innerHTML = 'Mostrar gráfico';
     }
   };
@@ -330,7 +331,7 @@ function setPromActivitiesPerOptionDay(json_data) {
   generateTable(json_data, first_date, last_date);
 }
 
-function showGraphicByUser() {
+function showUserSelectedAverages () {
   var userName =
     document.getElementById('selectUserId').options[
       document.getElementById('selectUserId').selectedIndex

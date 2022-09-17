@@ -40,7 +40,7 @@ function getPromByStudent($course_id, $user_id) {
     $arrayTiemposAlumnos = array();
     
     $id_role_student = getStudentRoleId ();
-    $contextId = getCourseContextId ($course_id);
+    $contextId = loadCourseContextId();
     
     $resultado = getUsersInThisCourse($course_id);
 
@@ -57,7 +57,7 @@ function getPromByStudent($course_id, $user_id) {
 function getPromPerAlumnoByDay($idAlumno, $course_id, $user_id){
     $idCourse = $course_id;
     $extra_indications = "ORDER BY timecreated ASC";
-    $resultado = loadLogsFileASC ($idAlumno, $user_id, $extra_indications);
+    $resultado = loadLogs ($idAlumno);
 
     $anteriorIgual = false;
     $anteriorCursoDistinto = true;
@@ -190,11 +190,11 @@ $sumaPromediosGrupo = 0;
 $arrayTiemposAlumnos = array();; 
 
 //Se obtiene el rol de estudiante con una función del archivo Queries.php
-$id_role_student = getStudentRoleId ();
+$id_role_student = loadStudentRoleId();
 //Se obtiene el contextId con una función del archivo Queries.php 
-$contextId = getCourseContextId ($course_id);
+$contextId = loadCourseContextId();
 //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-$resultado = getUsersInThisCourse($course_id);
+$resultado = loadUsers();
 
 
 $activityFound = false;

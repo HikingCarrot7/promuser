@@ -3,7 +3,7 @@
 function getPromActivityPerDayPerAlumno($idAlumno,$firstLastNames, $course_id, $user_id){
     $idCourse = $course_id;
     $extra_indications = "ORDER BY timecreated ASC";
-    $resultado = loadLogsFileASC($idAlumno, $user_id, $extra_indications);
+    $resultado = loadLogs($idAlumno);
 
     $anteriorIgual = false;
     $anteriorCursoDistinto = true;

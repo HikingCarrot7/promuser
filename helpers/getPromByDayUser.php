@@ -10,7 +10,7 @@ $idCourse = $_POST['idCourse'];
 $idUser = $_POST['idUser'];
 
 $extra_indications = "ORDER BY timecreated ASC";
-$resultado = loadLogsFileASC($idUser, $USER->id, $extra_indications);
+$resultado = loadLogs($idUser);
 
 
 $anteriorIgual = false;

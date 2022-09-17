@@ -56,7 +56,7 @@ $contentPromUser = <<< EOT
 
     </select>
     <div style='margin-top:10px;' id='buttonPromByUser'>
-    <button id="modalButton3" style="width: 100%;" onclick="showGraphicByUser()" type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalByUser">
+    <button id="modalButton3" style="width: 100%;" onclick="showUserSelectedAverages()" type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalByUser">
         <i class="far fa-chart-bar"></i>
         Ver tiempo promedio por día
     </button>
