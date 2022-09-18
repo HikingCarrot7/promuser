@@ -1,20 +1,17 @@
 <?php
-//include ($_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/database/Queries.php");
-include ($_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/models/ContextData.php");
-include ($_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/models/Group.php");
-include ($_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/models/Student.php");
+require_once(dirname(__FILE__) . '/../models/ContextData.php');
+require_once(dirname(__FILE__) . '/../models/Group.php');
+require_once(dirname(__FILE__) . '/../models/Student.php');
 
-
-function initializeContext ($courseId,$professorId) {
+function initializeContext($courseId, $professorId) {
     $context = new ContextData($courseId);
-    $context->courseContextId = getCourseContextId ($courseId);
-    $context->studentRoleId = getStudentRoleId ();
+    $context->courseContextId = getCourseContextId($courseId);
+    $context->studentRoleId = getStudentRoleId();
     $context->professorId = $professorId;
     writeContextFile($context);
 }
 
 function loadUsers() {
-
     //Se lee el objeto Group
     $group = readGroupFile();
     $context = readContextFile();
@@ -29,74 +26,61 @@ function loadUsers() {
     return $group->users;
 }
 
-function loadLogs ($id) {
-
-    $students = readStudentsFile(); //Se obtiene el array de students
+function loadLogs($id) {
+    $students = readStudentsFile(); // Se obtiene el array de students
     $context = readContextFile();
-    $extraIndications = "ORDER BY timecreated ASC"; //Indicacines para la búsqueda en BD
+    $extraIndications = "ORDER BY timecreated ASC"; // Indicacines para la búsqueda en BD
 
     if ($students[$id] == null) {
         $student = new Student($id);
-
-        $student->logs = getLogs($id,$context->professorId,$extraIndications); //Se guardan los logs en el student
-        $students[$id] = $student; //Se guarda el student en el array de students
+        $student->logs = getLogs($id, $context->professorId, $extraIndications); // Se guardan los logs en el student
+        $students[$id] = $student; // Se guarda el student en el array de students
         writeStudentsFile($students);
-    }else {
+    } else {
         if ($students[$id]->logs == null) {
-            $students[$id]->logs = getLogs($id,$context->professorId,$extraIndications);
+            $students[$id]->logs = getLogs($id, $context->professorId, $extraIndications);
             writeStudentsFile($students);
         }
         $student = $students[$id];
     }
-    
-    
     return $student->logs;
 }
 
-function getAnStudent ($id) {
+function getAnStudent($id) {
     $students = readStudentsFile();
     return $students[$id];
 }
 
-function getUsersIds (){
+function getUsersIds() {
     $ids = array();
     $users = loadUsers();
-
     foreach ($users as $key => $aUser) {
         $ids[$key] = $aUser->id;
     }
     return $ids;
 }
 
-function loadCourseContextId () {
+function loadCourseContextId() {
     $context = readContextFile();
-
     return $context->courseContextId;
 }
 
-function loadStudentRoleId () {
+function loadStudentRoleId() {
     $context = readContextFile();
-
     return $context->studentRoleId;
 }
 
-function loadCourseId () {
+function loadCourseId() {
     $context = readContextFile();
-
     return $context->courseId;
 }
 
-function loadProfessorId () {
+function loadProfessorId() {
     $context = readContextFile();
-
     return $context->professorId;
 }
 
-
-
-
-
-function loadProm () {
+function loadProm() {
     //Se declara la ruta del archivo de datos
     $pathFile = '../files/prom.txt';
 
@@ -104,7 +88,7 @@ function loadProm () {
     if (filesize($pathFile) == false) {
         //Se obtienen los datos
         $prom = getProm();
-        writeDataFile($pathFile,$prom);
+        writeDataFile($pathFile, $prom);
     } else {
         $prom = readDataFile($pathFile);
     }
@@ -113,30 +97,14 @@ function loadProm () {
 }
 
 //Funciones de lectura y escritura de archivos ------------------------------------------
-
-
-function writeDataFile ($pathFile, $data) {
-    $writtenBytes = file_put_contents($pathFile,json_encode($data));
-    return $writtenBytes;
+function writeContextFile($data) {
+    $pathFile = dirname(__FILE__) . '/../files/ContextData.txt';
+    writeDataFile($pathFile, $data);
 }
 
-function readDataFile ($pathFile) {
-    $data = json_decode(file_get_contents($pathFile));
-    return $data;
-}
-
-
-//Funciones de lectura y escritura de archivos ------------------------------------------
-
-function writeContextFile ($data) {
-    $pathFile = $_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/files/ContextData.txt";
-    writeDataFile ($pathFile, $data);
-}
-
-function readContextFile () {
-    $pathFile = $_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/files/ContextData.txt";
+function readContextFile() {
+    $pathFile = dirname(__FILE__) . '/../files/ContextData.txt';
     $data = readDataFile($pathFile);
-
     $context = new ContextData($data->courseId);
 
     $context->courseContextId = $data->courseContextId;
@@ -146,12 +114,11 @@ function readContextFile () {
     return $context;
 }
 
-function readGroupFile () {
-    $pathFile = $_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/files/Group.txt";
+function readGroupFile() {
+    $pathFile = dirname(__FILE__) . '/../files/Group.txt';
     $group = new Group();
-    
     $data = readDataFile($pathFile);
-    
+
     $group->averagePerSession = $data->averagePerSession;
     $group->averagePerDay = $data->averagePerDay;
     $group->users = $data->users;
@@ -161,13 +128,13 @@ function readGroupFile () {
     return $group;
 }
 
-function writeGroupFile ($data) {
-    $pathFile = $_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/files/Group.txt";
-    writeDataFile ($pathFile, $data);
+function writeGroupFile($data) {
+    $pathFile = dirname(__FILE__) . '/../files/Group.txt';
+    writeDataFile($pathFile, $data);
 }
 
-function readStudentsFile () {
-    $pathFile = $_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/files/Students.txt";
+function readStudentsFile() {
+    $pathFile = dirname(__FILE__) . '/../files/Students.txt';
     $students = array();
     $data = readDataFile($pathFile);
 
@@ -187,33 +154,17 @@ function readStudentsFile () {
     return $students;
 }
 
-function writeStudentsFile ($data) {
-    $pathFile = $_SERVER['DOCUMENT_ROOT'] . "/Moodle/blocks/promuser/files/Students.txt";
-    writeDataFile ($pathFile, $data);
+function writeStudentsFile($data) {
+    $pathFile = dirname(__FILE__) . '/../files/Students.txt';
+    writeDataFile($pathFile, $data);
 }
 
-/*
-function readStudentsFile ($pathFile) {
-    $studentsArray = array();
-    $data = readDataFile($pathFile);
-    
-    foreach ($data as $aStudent) {
-        $student = new Student($aStudent->id);
-
-        $student->setId($aStudent->id);
-        $student->setName($aStudent->);
-        $student->setLogs($aStudent->logs);
-        $student->setAverage($aStudent->);
-        $student->setAveragePerActivity($aStudent->);
-        $student->setAveragePerActivityPerDay($aStudent->);
-
-        $studentsArray[$student->getId()] = $student;
-    }
-
-    return $group;
+function writeDataFile($pathFile, $data) {
+    $writtenBytes = file_put_contents($pathFile, json_encode($data));
+    return $writtenBytes;
 }
-*/
 
-
-
-?>
+function readDataFile($pathFile) {
+    $data = json_decode(file_get_contents($pathFile));
+    return $data;
+}

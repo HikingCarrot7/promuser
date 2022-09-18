@@ -1,15 +1,12 @@
 <?php
 
-    class ContextData {
+class ContextData {
+    public $courseId;
+    public $courseContextId;
+    public $studentRoleId;
+    public $professorId;
 
-        public $courseId;
-        public $courseContextId;
-        public $studentRoleId;
-        public $professorId;
-        
-        public function __construct ($courseId) {
-            $this->courseId = $courseId;
-        }
+    public function __construct($courseId) {
+        $this->courseId = $courseId;
     }
-
-?>
+}
