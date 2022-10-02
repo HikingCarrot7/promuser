@@ -119,6 +119,7 @@ $mods = array();
       xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       xhttp.send(params);
     };
+
     setProm();
 
     function setGrafo(dataComplete) {
@@ -135,6 +136,7 @@ $mods = array();
           color: "blue"
         },
       };
+
       dataSetNodes.push(studentNode);
 
       let counter = 2;
