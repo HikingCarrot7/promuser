@@ -1,9 +1,11 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $USER;
+
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
+
+global $USER;
 $variableCSV = array();
 
 function getPromByGroupPerInterval() {

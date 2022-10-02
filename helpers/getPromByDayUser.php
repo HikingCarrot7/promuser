@@ -1,10 +1,12 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $COURSE;
-global $USER;
+
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
+
+global $COURSE;
+global $USER;
 
 $idCourse = $_POST['idCourse'];
 $idUser = $_POST['idUser'];
@@ -32,7 +34,6 @@ foreach ($resultado as $rs) {
         $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
     }
     $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
-
 
     $contadorRegistro += 1;
     if ($contadorRegistro == sizeof($resultado)) {
@@ -87,7 +88,6 @@ foreach ($resultado as $rs) {
 $sumaPromediosTotal = 0;
 $contadorProm = 0;
 $arrayPromediosPorDia = array();
-
 
 foreach ($arrayDiferencias as $promedio) {
     if ($contadorProm == 0) {

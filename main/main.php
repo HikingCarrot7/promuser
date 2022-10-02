@@ -1,5 +1,5 @@
 <?php
-include('database/Queries.php');
+
 //Se declara el código HTML del bloque PromUser
 $contentPromUser = <<< EOT
 
@@ -71,6 +71,3 @@ $contentPromUser = <<< EOT
     
 EOT;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-?>
-
-    
