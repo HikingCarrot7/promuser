@@ -1,33 +1,7 @@
 <?php
-require_once(dirname(__FILE__) . '/../../../config.php');
-defined('MOODLE_INTERNAL') || die();
-global $USER;
-include('../database/Queries.php');
-include('../database/FilesChecker.php');
-$variableCSV = array();
 
-function getPromActivitiesPerOption($option) {
-    global $USER;
-    $course_id = $_GET['idCourse'];
-    //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-    $resultado = getUsersInThisCourse($course_id);
-
-    foreach ($resultado as $keyUser => $rs) {
-        if ($USER->id != $rs->userid) {
-            $namesComplete = $rs->firstname . " " . $rs->lastname;
-            $namesComplete = str_replace(" ", ";", $namesComplete);
-
-            if ($option == "day") {
-                getPromActivityPerDayPerAlumno($rs->userid, $namesComplete);
-            }
-        }
-    }
-}
-
-function getPromActivityPerDayPerAlumno($idAlumno, $firstLastNames) {
-    global $variableCSV;
-
-    $idCourse = $_GET['idCourse'];
+function getPromActivityPerDayPerAlumno($idAlumno, $course_id) {
+    $idCourse = $course_id;
     $resultado = loadLogs($idAlumno);
 
     $anteriorIgual = false;
@@ -106,7 +80,7 @@ function getPromActivityPerDayPerAlumno($idAlumno, $firstLastNames) {
     foreach ($resultado as $key => $rs) {
         if (strpos($rs->component, "mod") !== false) {
             if (is_null($beginActivity)) {
-                if ($_GET['idCourse'] == $rs->courseid) {
+                if ($course_id == $rs->courseid) {
                     $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
                     $firstId = $rs->id;
                 }
@@ -122,7 +96,7 @@ function getPromActivityPerDayPerAlumno($idAlumno, $firstLastNames) {
                     $beginActivity = NULL;
                     $diferencia = NULL;
                     $firstId = NULL;
-                    if ($_GET['idCourse'] == $rs->courseid) {
+                    if ($course_id == $rs->courseid) {
                         $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
                         $firstId = $rs->id;
                     }
@@ -179,37 +153,47 @@ function getPromActivityPerDayPerAlumno($idAlumno, $firstLastNames) {
         array_push($allDays, date("Y-m-d", $i));
     }
 
-    $contadorNum = 0;
+    $matrizActivityDay = [];
 
-    foreach ($nameActivity as $unRegistro) {
-        $unRegistro->idAlumno = $idAlumno;
-        $unRegistro->nombre = $firstLastNames;
-        $unRegistro->herramienta = $nameActivity[$contadorNum];
-        $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');
-        $unRegistro->duracion = $timeActivity[$contadorNum];
-
-        array_push($variableCSV, json_encode($unRegistro));
-
-        $contadorNum = $contadorNum + 1;
+    foreach ($nameActivity as $keyAct => $activity) {
+        foreach ($namesTableActivities as $keyName => $name) {
+            if ($name == $activity) {
+                foreach ($allDays as $keyDay => $day) {
+                    if ($dateBeginActivity[$keyAct]->format('Y-m-d') == $day) {
+                        if ($timeActivity[$keyAct] != 0) {
+                            if ($matrizActivityDay[$keyName][$keyDay] != NULL) {
+                                $matrizActivityDay[$keyName][$keyDay] += $timeActivity[$keyAct];
+                            } else {
+                                $matrizActivityDay[$keyName][$keyDay] = 0;
+                                $matrizActivityDay[$keyName][$keyDay] += $timeActivity[$keyAct];
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-}
 
-getPromActivitiesPerOption("day");
+    $finalTableValues = array();
+    $sumActivity = 0;
+    $valueProm = 0;
 
-$data = "";
-$counter = 0;
+    foreach ($namesTableActivities as $keyName => $name) {
+        foreach ($allDays as $keyDay => $day) {
+            $sumActivity += $matrizActivityDay[$keyName][$keyDay];
+        }
+        $valueProm = ($sumActivity / sizeof($matrizActivityDay[$keyName]));
+        $valueProm = round($valueProm);
 
-foreach ($variableCSV as $key => $row) {
-    if ($counter == 0) {
-        $data .= "ID del Alumno" . "," . "Nombre del Alumno" . "," . "Recurso" . "," . "Fecha de inicio" . "," . "Duracion en Segundos" . "\n";
+        if (is_nan($valueProm)) {
+            $valueProm = 0;
+        }
+        $finalTableValues[$keyName] = $valueProm;
+        $valueProm = 0;
+        $sumActivity = 0;
     }
-    $value = json_decode($row);
 
-    $data .= $value->idAlumno . "," . $value->nombre . "," . $value->herramienta . "," . $value->fechaInicio . "," . $value->duracion . "\n";
-    $counter++;
+    $finalTable = array_combine($namesTableActivities, $finalTableValues);
+
+    return $finalTable;
 }
-
-header('Content-Type: application/csv; charset=UTF-8');
-header('Content-Disposition: attachment; filename=datos_recursos.csv');
-
-echo $data;

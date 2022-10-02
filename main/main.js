@@ -26,13 +26,13 @@ function setCSV() {
 setCSV();
 
 function showInformation() {
-  let results = getTotalResults();
-  if (results[0] == null) {
+  /*let results = getTotalResults();
+  if (results[0] == null) {*/
     document.getElementById('loading').style.display = 'block';
-  } else {
+  /*} else {
     document.getElementById('generalInformation1').innerHTML = results[0];
     document.getElementById('generalInformation2').innerHTML = results[1];
-  }
+  }*/
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -50,7 +50,7 @@ function showInformation() {
       seconds = seconds < 10 ? '0' + seconds : seconds;
 
       let result1 = hours + ':' + minutes + ':' + seconds;
-      localStorage.setItem('totalPromResult1', result1);
+      //localStorage.setItem('totalPromResult1', result1);
       document.getElementById('generalInformation1').innerHTML = result1;
 
       time2 = jsonResponse[1];
@@ -65,7 +65,7 @@ function showInformation() {
       seconds1 = seconds1 < 10 ? '0' + seconds1 : seconds1;
 
       let result2 = hours1 + ':' + minutes1 + ':' + seconds1;
-      localStorage.setItem('totalPromResult2', result2);
+      //localStorage.setItem('totalPromResult2', result2);
       document.getElementById('generalInformation2').innerHTML = result2;
     }
   };
@@ -86,10 +86,10 @@ function showInformation() {
 }
 
 function getTotalResults() {
-  let result1 = localStorage.getItem('totalPromResult1');
-  let result2 = localStorage.getItem('totalPromResult2');
+  //let result1 = localStorage.getItem('totalPromResult1');
+  //let result2 = localStorage.getItem('totalPromResult2');
 
-  return [result1, result2];
+  //return [result1, result2];
 }
 
 function setProm() {
@@ -180,6 +180,7 @@ function showGraphicClassNetworks() {
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       setPromActivitiesPerStudentTable(JSON.parse(this.responseText));
+      console.log(JSON.parse(this.responseText));
       document.getElementById('graphic-class').innerHTML = 'Mostrar gráfico';
     }
   };
@@ -268,10 +269,10 @@ function updateTableActivitiesPerDay() {
 }
 
 function setPromActivitiesPerOptionInterval(json_data) {
-  localStorage.setItem(
+  /*localStorage.setItem(
     'PromActivitiesPerOptionInterval',
     JSON.stringify(json_data)
-  );
+  );*/
   changeTitleModal('Tiempo promedio del grupo por actividad');
   let first_date = new Date(json_data['first_date']['date']);
   first_date =
@@ -301,7 +302,7 @@ function setPromActivitiesPerOptionInterval(json_data) {
 }
 
 function setPromActivitiesPerOptionDay(json_data) {
-  localStorage.setItem('PromActivitiesPerOptionDay', JSON.stringify(json_data));
+  //localStorage.setItem('PromActivitiesPerOptionDay', JSON.stringify(json_data));
   changeTitleModal('Tiempo promedio del grupo por día');
   let first_date = new Date(json_data['first_date']['date']);
   first_date =
@@ -330,7 +331,7 @@ function setPromActivitiesPerOptionDay(json_data) {
   generateTable(json_data, first_date, last_date);
 }
 
-function showGraphicByUser() {
+function showUserSelectedAverages () {
   var userName =
     document.getElementById('selectUserId').options[
       document.getElementById('selectUserId').selectedIndex

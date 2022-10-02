@@ -1,275 +1,263 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $DB;
 global $USER;
-
+include('../database/Queries.php');
+include('../database/FilesChecker.php');
 
 function getPromByGroupPerInterval() {
-  global $DB;
-  global $USER;
+    global $USER;
+    $course_id = $_POST['idCourse'];
+    $sumaPromediosGrupo = 0;
+    $arrayTiemposAlumnos = array();
 
-  $sumaPromediosGrupo = 0;
-  $arrayTiemposAlumnos = array();
+    //Se obtiene el rol de estudiante con una función del archivo Queries.php
+    $id_role_student = getStudentRoleId();
+    //Se obtiene el contextId con una función del archivo Queries.php 
+    $contextId = loadCourseContextId();
+    //Se obtienen los usuarios de este curso con una función del archivo Queries.php
+    $resultado = getUsersInThisCourse($course_id);
 
-  $id_role_student = $DB->get_record_sql("SELECT id FROM mdl_role WHERE shortname = 'student';")->id;
-  $contextId = $DB->get_record_sql("SELECT id FROM mdl_context WHERE contextlevel = 50 AND instanceid = " . $_POST['idCourse'] . ";")->id;
-
-  $resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-    GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-    WHERE user_role.by_role = 1 AND user_role.roles = " . $id_role_student . " AND user_role.contextid = " . $contextId . ") data_role
-    INNER JOIN mdl_user users ON data_role.userid = users.id;");
-
-  foreach ($resultado as $rs) {
-    if ($USER->id != $rs->userid) {
-      $promedioTiempoAlumno = getPromPerAlumno($rs->userid);
-      $sumaPromediosGrupo += $promedioTiempoAlumno;
-      array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
+    foreach ($resultado as $rs) {
+        if ($USER->id != $rs->userid) {
+            $promedioTiempoAlumno = getPromPerAlumno($rs->userid);
+            $sumaPromediosGrupo += $promedioTiempoAlumno;
+            array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
+        }
     }
-  }
 
-  $valorTotalGrupo = $sumaPromediosGrupo / sizeof($arrayTiemposAlumnos);
-
-  $valorTotalGrupo = round($valorTotalGrupo);
-
-  return $valorTotalGrupo;
+    $valorTotalGrupo = $sumaPromediosGrupo / sizeof($arrayTiemposAlumnos);
+    $valorTotalGrupo = round($valorTotalGrupo);
+    return $valorTotalGrupo;
 }
 
 function getPromByGroupPerDay() {
-  global $DB;
-  global $USER;
+    $course_id = loadCourseId();
+    $professorId = loadProfessorId();
 
-  $sumaPromediosGrupo = 0;
-  $arrayTiemposAlumnos = array();
+    $sumaPromediosGrupo = 0;
+    $arrayTiemposAlumnos = array();
 
-  $id_role_student = $DB->get_record_sql("SELECT id FROM mdl_role WHERE shortname = 'student';")->id;
-  $contextId = $DB->get_record_sql("SELECT id FROM mdl_context WHERE contextlevel = 50 AND instanceid = " . $_POST['idCourse'] . ";")->id;
+    //Se obtiene el rol de estudiante con una función del archivo Queries.php
+    $id_role_student = getStudentRoleId();
+    //Se obtiene el contextId con una función del archivo Queries.php 
+    $contextId = loadCourseContextId();
+    //Se obtienen los usuarios de este curso con una función del archivo Queries.php
+    $users = loadUsers();
 
-
-  $resultado = $DB->get_records_sql("SELECT id, userid, username, firstname, lastname, email FROM (SELECT * FROM (SELECT userid, contextid,COUNT(*) AS by_role,
-    GROUP_CONCAT(roleid) AS roles FROM mdl_role_assignments GROUP BY userid, contextid) user_role
-    WHERE user_role.by_role = 1 AND user_role.roles = " . $id_role_student . " AND user_role.contextid = " . $contextId . ") data_role
-    INNER JOIN mdl_user users ON data_role.userid = users.id;");
-
-  foreach ($resultado as $rs) {
-    if ($USER->id != $rs->userid) {
-      $promedioTiempoAlumno = getPromPerAlumnoByDay($rs->userid);
-      $sumaPromediosGrupo += $promedioTiempoAlumno;
-      array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
+    foreach ($users as $aUser) {
+        if ($professorId != $aUser->userid) {
+            $promedioTiempoAlumno = getPromPerAlumnoByDay($aUser->userid);
+            $sumaPromediosGrupo += $promedioTiempoAlumno;
+            array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
+        }
     }
-  }
 
-  $valorTotalGrupo = $sumaPromediosGrupo / sizeof($arrayTiemposAlumnos);
-
-  $valorTotalGrupo = round($valorTotalGrupo);
-
-  return $valorTotalGrupo;
+    $valorTotalGrupo = $sumaPromediosGrupo / sizeof($arrayTiemposAlumnos);
+    $valorTotalGrupo = round($valorTotalGrupo);
+    return $valorTotalGrupo;
 }
 
 function getPromPerAlumno($idAlumno) {
-  global $DB;
-  global $USER;
+    $idCourse = $_POST['idCourse'];
+    $extra_indications = "ORDER BY timecreated ASC";
+    $resultado = loadLogs($idAlumno);
 
-  $idCourse = $_POST['idCourse'];
-  $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = " . $idAlumno . ") AND (target != 'config_log') AND (userid <> " . $USER->id . ") ORDER BY timecreated ASC");
+    $anteriorIgual = false;
+    $anteriorCursoDistinto = true;
+    $sumaTotal = 0;
 
+    $arrayDiferencias = array();
 
-  $anteriorIgual = false;
-  $anteriorCursoDistinto = true;
-  $sumaTotal = 0;
+    $contadorRegistro = 0;
 
-  $arrayDiferencias = array();
+    foreach ($resultado as $rs) {
+        $contadorRegistro += 1;
+        $course = $rs->courseid;
 
-  $contadorRegistro = 0;
+        if ($course == $idCourse) {
+            if ($anteriorIgual == true) {
+                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                $sumaTotal += $diferencia;
 
-  foreach ($resultado as $rs) {
-    $contadorRegistro += 1;
-    $course = $rs->courseid;
+                if ($contadorRegistro == sizeof($resultado)) {
+                    array_push($arrayDiferencias, $sumaTotal);
+                    $sumaTotal = 0;
+                    $anteriorCursoDistinto = true;
+                    $anteriorIgual = false;
+                }
 
-    if ($course == $idCourse) {
-      if ($anteriorIgual == true) {
-        $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-        $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-        $sumaTotal += $diferencia;
+                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                $anteriorIgual = true;
+            } else {
+                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                $anteriorIgual = true;
+            }
+            $anteriorCursoDistinto = false;
+        } else {
+            if ($anteriorCursoDistinto == false) {
+                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                $sumaTotal += $diferencia;
 
-        if ($contadorRegistro == sizeof($resultado)) {
-          array_push($arrayDiferencias, $sumaTotal);
-          $sumaTotal = 0;
-          $anteriorCursoDistinto = true;
-          $anteriorIgual = false;
+                array_push($arrayDiferencias, $sumaTotal);
+                $sumaTotal = 0;
+                $anteriorCursoDistinto = true;
+                $anteriorIgual = false;
+            }
         }
-
-        $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-        $anteriorIgual = true;
-      } else {
-        $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-        $anteriorIgual = true;
-      }
-      $anteriorCursoDistinto = false;
-    } else {
-      if ($anteriorCursoDistinto == false) {
-        $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-        $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-        $sumaTotal += $diferencia;
-
-        array_push($arrayDiferencias, $sumaTotal);
-        $sumaTotal = 0;
-        $anteriorCursoDistinto = true;
-        $anteriorIgual = false;
-      }
     }
-  }
 
-  foreach ($arrayDiferencias as $key => $value) {
-    if ($value == 0) {
-      unset($arrayDiferencias[$key]);
+    foreach ($arrayDiferencias as $key => $value) {
+        if ($value == 0) {
+            unset($arrayDiferencias[$key]);
+        }
     }
-  }
 
-  $arrayDiferencias = array_values($arrayDiferencias);
-  $sumaPromediosTotal = array_sum($arrayDiferencias);
-  $valorTotal = $sumaPromediosTotal / sizeof($arrayDiferencias);
-  $valorTotal = round($valorTotal);
+    $arrayDiferencias = array_values($arrayDiferencias);
+    $sumaPromediosTotal = array_sum($arrayDiferencias);
+    $valorTotal = $sumaPromediosTotal / sizeof($arrayDiferencias);
+    $valorTotal = round($valorTotal);
 
-  if (is_nan($valorTotal)) {
-    $valorTotal = 0;
-  }
-  return $valorTotal;
+    if (is_nan($valorTotal)) {
+        $valorTotal = 0;
+    }
+    return $valorTotal;
 }
 
 function getPromPerAlumnoByDay($idAlumno) {
-  global $DB;
-  global $USER;
+    $idCourse = $_POST['idCourse'];
+    $extra_indications = "ORDER BY timecreated ASC";
+    $resultado = loadLogs($idAlumno);
 
-  $idCourse = $_POST['idCourse'];
-  $resultado = $DB->get_records_sql("SELECT * FROM mdl_logstore_standard_log where (userid = " . $idAlumno . ") AND (target != 'config_log') AND (userid <> " . $USER->id . ") ORDER BY timecreated ASC");
+    $anteriorIgual = false;
+    $anteriorCursoDistinto = true;
+    $sumaTotal = 0;
+    $diaVueltaAnterior = new DateTime();
+    $diaVueltaActual = new DateTime();
 
+    $arrayDiferencias = array();
+    $arrayFechas = array();
 
-  $anteriorIgual = false;
-  $anteriorCursoDistinto = true;
-  $sumaTotal = 0;
-  $diaVueltaAnterior = new DateTime();
-  $diaVueltaActual = new DateTime();
+    $contadorRegistro = 0;
 
-  $arrayDiferencias = array();
-  $arrayFechas = array();
-
-  $contadorRegistro = 0;
-
-
-  foreach ($resultado as $rs) {
-    if (contadorRegistro == 0) {
-      $diaVueltaAnterior = new DateTime(date('Y-m-d', $rs->timecreated));
-      $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
-    }
-    $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
-
-
-    $contadorRegistro += 1;
-    $course = $rs->courseid;
-
-    if ($course == $idCourse) {
-
-      if ($anteriorIgual == true) {
-        $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-        $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-        $sumaTotal += $diferencia;
-
-
-        if ($contadorRegistro == sizeof($resultado) && $diaVueltaActual == $diaVueltaAnterior) {
-          array_push($arrayDiferencias, $sumaTotal);
-          array_push($arrayFechas, $diaVueltaAnterior);
-          $sumaTotal = 0;
-          $anteriorCursoDistinto = true;
-          $anteriorIgual = false;
+    foreach ($resultado as $rs) {
+        if ($contadorRegistro == 0) {
+            $diaVueltaAnterior = new DateTime(date('Y-m-d', $rs->timecreated));
+            $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
         }
-        $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-        $anteriorIgual = true;
-      } else {
-        $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-        $anteriorIgual = true;
-      }
-      $anteriorCursoDistinto = false;
-    } else {
-      if ($anteriorCursoDistinto == false) {
         $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
 
-        $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-        $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-        $sumaTotal += $diferencia;
+        $contadorRegistro += 1;
+        $course = $rs->courseid;
 
-        array_push($arrayDiferencias, $sumaTotal);
-        array_push($arrayFechas, $diaVueltaAnterior);
-        $sumaTotal = 0;
-        $anteriorCursoDistinto = true;
-        $anteriorIgual = false;
-      }
+        if ($course == $idCourse) {
+
+            if ($anteriorIgual == true) {
+                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                $sumaTotal += $diferencia;
+
+
+                if ($contadorRegistro == sizeof($resultado) && $diaVueltaActual == $diaVueltaAnterior) {
+                    array_push($arrayDiferencias, $sumaTotal);
+                    array_push($arrayFechas, $diaVueltaAnterior);
+                    $sumaTotal = 0;
+                    $anteriorCursoDistinto = true;
+                    $anteriorIgual = false;
+                }
+                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                $anteriorIgual = true;
+            } else {
+                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                $anteriorIgual = true;
+            }
+            $anteriorCursoDistinto = false;
+        } else {
+            if ($anteriorCursoDistinto == false) {
+                $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
+
+                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                $sumaTotal += $diferencia;
+
+                array_push($arrayDiferencias, $sumaTotal);
+                array_push($arrayFechas, $diaVueltaAnterior);
+                $sumaTotal = 0;
+                $anteriorCursoDistinto = true;
+                $anteriorIgual = false;
+            }
+        }
+        if ($diaVueltaAnterior != $diaVueltaActual && $course == $idCourse) {
+            array_push($arrayDiferencias, $sumaTotal);
+            array_push($arrayFechas, $diaVueltaAnterior);
+            $sumaTotal = 0;
+            $anteriorCursoDistinto = true;
+            $anteriorIgual = false;
+        }
+        $diaVueltaAnterior = new DateTime(date('Y-m-d', $rs->timecreated));
     }
-    if ($diaVueltaAnterior != $diaVueltaActual && $course == $idCourse) {
-      array_push($arrayDiferencias, $sumaTotal);
-      array_push($arrayFechas, $diaVueltaAnterior);
-      $sumaTotal = 0;
-      $anteriorCursoDistinto = true;
-      $anteriorIgual = false;
-    }
-    $diaVueltaAnterior = new DateTime(date('Y-m-d', $rs->timecreated));
-  }
 
-  $sumaPromediosTotal = 0;
-  $contadorProm = 0;
-  $arrayPromediosPorDia = array();
+    $sumaPromediosTotal = 0;
+    $contadorProm = 0;
+    $arrayPromediosPorDia = array();
 
 
-  foreach ($arrayDiferencias as $promedio) {
-    if ($contadorProm == 0) {
-      $fAnterior = $arrayFechas[$contadorProm];
-    }
-    $fActual = $arrayFechas[$contadorProm];
+    foreach ($arrayDiferencias as $promedio) {
+        if ($contadorProm == 0) {
+            $fAnterior = $arrayFechas[$contadorProm];
+        }
+        $fActual = $arrayFechas[$contadorProm];
 
-    if ($fActual == $fAnterior) {
-      $sumaPromediosTotal += $promedio;
-      if ($contadorProm == (sizeof($arrayDiferencias) - 1)) {
-        array_push($arrayPromediosPorDia, $sumaPromediosTotal);
-        $sumaPromediosTotal = 0;
-      }
-    } else {
-      array_push($arrayPromediosPorDia, $sumaPromediosTotal);
-      $sumaPromediosTotal = 0;
-      $sumaPromediosTotal += $promedio;
+        if ($fActual == $fAnterior) {
+            $sumaPromediosTotal += $promedio;
+            if ($contadorProm == (sizeof($arrayDiferencias) - 1)) {
+                array_push($arrayPromediosPorDia, $sumaPromediosTotal);
+                $sumaPromediosTotal = 0;
+            }
+        } else {
+            array_push($arrayPromediosPorDia, $sumaPromediosTotal);
+            $sumaPromediosTotal = 0;
+            $sumaPromediosTotal += $promedio;
+        }
+
+        $fAnterior = $fActual;
+        $contadorProm += 1;
     }
 
-    $fAnterior = $fActual;
-    $contadorProm += 1;
-  }
-
-  foreach ($arrayPromediosPorDia as $key => $value) {
-    if ($value == 0) {
-      unset($arrayPromediosPorDia[$key]);
+    foreach ($arrayPromediosPorDia as $key => $value) {
+        if ($value == 0) {
+            unset($arrayPromediosPorDia[$key]);
+        }
     }
-  }
 
-  $arrayPromediosPorDia = array_values($arrayPromediosPorDia);
+    $arrayPromediosPorDia = array_values($arrayPromediosPorDia);
 
-  $sumaPromDias = 0;
-  foreach ($arrayPromediosPorDia as $key => $value) {
-    $sumaPromDias += $value;
-  }
+    $sumaPromDias = 0;
+    foreach ($arrayPromediosPorDia as $key => $value) {
+        $sumaPromDias += $value;
+    }
 
-  $valorTotal = 0;
-  $valorTotal = $sumaPromDias / sizeof($arrayPromediosPorDia);
-  $valorTotal = round($valorTotal);
-
-  if (is_nan($valorTotal)) {
     $valorTotal = 0;
-  }
-  return $valorTotal;
+    $valorTotal = $sumaPromDias / sizeof($arrayPromediosPorDia);
+    $valorTotal = round($valorTotal);
+
+    if (is_nan($valorTotal)) {
+        $valorTotal = 0;
+    }
+    return $valorTotal;
 }
 
-$times = array();
+function generateTimes() {
+    $times = array();
+    $segundos = getPromByGroupPerInterval();
+    $segundos1 = getPromByGroupPerDay();
+    array_push($times, $segundos);
+    array_push($times, $segundos1);
+    return $times;
+}
 
-$segundos = getPromByGroupPerInterval();
-$segundos1 = getPromByGroupPerDay();
-array_push($times, $segundos);
-array_push($times, $segundos1);
+$times = generateTimes();
 
 echo json_encode($times);
