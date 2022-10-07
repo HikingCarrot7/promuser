@@ -4,7 +4,6 @@ defined('MOODLE_INTERNAL') || die();
 
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
-include('tables_functions.php');
 
 global $COURSE;
 global $USER;
@@ -27,7 +26,7 @@ function getSemesterAvgTimeSpentForAllStudents($idCourse, $idUser) {
 }
 
 $sumaPromediosGrupo = 0;
-$arrayTiemposAlumnos = array();;
+$arrayTiemposAlumnos = array();
 
 //Se obtiene el rol de estudiante con una función del archivo Queries.php
 $id_role_student = loadStudentRoleId();
@@ -53,7 +52,7 @@ foreach ($resultado as $keyUser => $rs) {
 
         $namesComplete = $rs->firstname . " " . $rs->lastname;
         $namesComplete = str_replace(" ", ",", $namesComplete);
-        $matrizResultado = getPromActivityPerDayPerAlumno($rs->userid, $course_id);
+        $matrizResultado = Student::getSemesterAvgTimeSpentPerActivityPerDay($rs->userid, $course_id);
 
         $numberAccess = Student::getSemesterAccessesCount($rs->userid, $course_id, $user_id);
 

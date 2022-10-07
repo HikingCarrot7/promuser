@@ -1,190 +1,15 @@
 <?php
 require_once(dirname(__FILE__) . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
-global $USER;
+
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
-include('tables_functions.php');
+
+global $USER;
 
 $course_id = $_POST['idCourse'];
 $option_selected = $_POST['option'];
 $user_id = $USER->id;
-
-function getPromActivityPerAlumno($course_id, $idAlumno) {
-    $idCourse = $course_id;
-    $resultado = loadLogs($idAlumno);
-
-    $anteriorIgual = false;
-    $anteriorCursoDistinto = true;
-    $sumaTotal = 0;
-
-    $arrayDiferencias = array();
-    $arrayFechasInicio = array();
-    $arrayFechasFin = array();
-
-    $contadorRegistro = 0;
-
-    foreach ($resultado as $rs) {
-        $contadorRegistro += 1;
-        $course = $rs->courseid;
-
-        if ($course == $idCourse) {
-            if ($anteriorIgual == true) {
-                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                $sumaTotal += $diferencia;
-
-                if ($contadorRegistro == sizeof($resultado)) {
-                    array_push($arrayDiferencias, $sumaTotal);
-                    array_push($arrayFechasFin, new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                    $sumaTotal = 0;
-                    $anteriorCursoDistinto = true;
-                    $anteriorIgual = false;
-                }
-
-                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-                $anteriorIgual = true;
-            } else {
-                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-                array_push($arrayFechasInicio, $inicio);
-                $anteriorIgual = true;
-            }
-            $anteriorCursoDistinto = false;
-        } else {
-            if ($anteriorCursoDistinto == false) {
-                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                $sumaTotal += $diferencia;
-
-                array_push($arrayDiferencias, $sumaTotal);
-                array_push($arrayFechasFin, new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                $sumaTotal = 0;
-                $anteriorCursoDistinto = true;
-                $anteriorIgual = false;
-            }
-        }
-    }
-
-    $beginActivity = NULL;
-    $idActivity = array();
-    $nameActivity = array();
-    $timeActivity = array();
-    $dateBeginActivity = array();
-
-    $beforeActivity = NULL;
-    $firstId = NULL;
-    $contadorMods = 0;
-
-    $idMods = array();
-
-    foreach ($resultado as $key => $rs) {
-        if (strpos($rs->component, "mod") !== false) {
-            if (is_null($beginActivity)) {
-                if ($course_id == $rs->courseid) {
-                    $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-                    $firstId = $rs->id;
-                }
-            } else {
-                if ($beforeActivity != $rs->component) {
-                    $diferencia = $beginActivity->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                    $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                    array_push($idMods, $rs->id);
-                    array_push($idActivity, $firstId);
-                    array_push($nameActivity, $beforeActivity);
-                    array_push($timeActivity, $diferencia);
-                    array_push($dateBeginActivity, $beginActivity);
-                    $beginActivity = NULL;
-                    $diferencia = NULL;
-                    $firstId = NULL;
-                    if ($course_id == $rs->courseid) {
-                        $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-                        $firstId = $rs->id;
-                    }
-                } else {
-                    if (sizeof($resultado) == ($contadorMods + 1)) {
-                        $diferencia = $beginActivity->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                        $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                        array_push($idMods, $rs->id);
-                        array_push($idActivity, $firstId);
-                        array_push($nameActivity, $beforeActivity);
-                        array_push($timeActivity, $diferencia);
-                        array_push($dateBeginActivity, $beginActivity);
-                        $beginActivity = NULL;
-                        $diferencia = NULL;
-                        $firstId = NULL;
-                    }
-                }
-            }
-        } else {
-            if (!is_null($beginActivity)) {
-                $diferencia = $beginActivity->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                array_push($idMods, $rs->id);
-                array_push($idActivity, $firstId);
-                array_push($nameActivity, $beforeActivity);
-                array_push($timeActivity, $diferencia);
-                array_push($dateBeginActivity, $beginActivity);
-                $beginActivity = NULL;
-                $diferencia = NULL;
-                $firstId = NULL;
-            }
-        }
-        $beforeActivity = $rs->component;
-        $contadorMods += 1;
-    }
-
-    $namesTableActivities = array_unique($nameActivity);
-    $namesTableActivities = array_values($namesTableActivities);
-    $timesTableActivities = array();
-
-    $size_tableactivities = sizeof($namesTableActivities);
-    for ($i = 0; $i < $size_tableactivities; $i++) {
-        $timesTableActivities[$i] = array();
-    }
-
-    $prueba1 = array();
-
-    $conta = 0;
-    foreach ($nameActivity as $keyAct => $activity) {
-        foreach ($arrayFechasInicio as $key => $rs) {
-            if ($dateBeginActivity[$keyAct] > $rs && $dateBeginActivity[$keyAct] < $arrayFechasFin[$key]) {
-                foreach ($namesTableActivities as $index => $name) {
-                    if ($name == $activity) {
-                        if ($timeActivity[$keyAct] != 0) {
-                            array_push($timesTableActivities[$index], $timeActivity[$keyAct]);
-                            array_push($prueba1, $index);
-                            $conta += 1;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    $finalTableValues = array();
-    $sumActivity = 0;
-    $valueProm = 0;
-
-    foreach ($namesTableActivities as $index => $name) {
-        foreach ($timesTableActivities[$index] as $activity) {
-            $sumActivity += $activity;
-        }
-        $valueProm = $sumActivity / sizeof($timesTableActivities[$index]);
-
-        $valueProm = round($valueProm);
-
-        if (is_nan($valueProm)) {
-            $valueProm = 0;
-        }
-        $finalTableValues[$index] = $valueProm;
-        $valueProm = 0;
-        $sumActivity = 0;
-    }
-
-    $finalTable = array_combine($namesTableActivities, $finalTableValues);
-
-    return $finalTable;
-}
 
 $sumaPromediosGrupo = 0;
 $arrayTiemposAlumnos = array();
@@ -211,7 +36,7 @@ foreach ($resultado as $keyUser => $rs) {
         $namesComplete = $rs->firstname . " " . $rs->lastname;
         $namesComplete = str_replace(" ", ",", $namesComplete);
         if ($option_selected == "interval") {
-            $matrizResultado = getPromActivityPerAlumno($course_id, $rs->userid);
+            $matrizResultado = Student::getSemesterAvgTimeSpentPerActivity($rs->userid, $course_id);
             //FIRST DATE
             $extra_indications = "ORDER BY timecreated ASC LIMIT 1";
             $rows = getLogs($rs->userid, $user_id, $extra_indications);
@@ -240,7 +65,7 @@ foreach ($resultado as $keyUser => $rs) {
             }
         } else {
             if ($option_selected == "day") {
-                $matrizResultado = getPromActivityPerDayPerAlumno($rs->userid, $course_id);
+                $matrizResultado = Student::getSemesterAvgTimeSpentPerActivityPerDay($rs->userid, $course_id);
                 //FIRST_DATE
                 $extra_indications = "ORDER BY timecreated ASC LIMIT 1";
                 $rows = getLogs($rs->userid, $user_id, $extra_indications);
@@ -289,6 +114,7 @@ foreach ($resultado as $keyUser => $rs) {
                     $activityFound = true;
                 }
             }
+
             if ($activityFound == false) {
                 array_push($activities, $nameAct);
                 foreach ($activities as $keyAct => $act) {
