@@ -80,6 +80,76 @@ class Student {
         return $valorTotal;
     }
 
+    public  static function getSemesterAvgTimeSpentCSV(&$variableCSV, $idStudent, $firstLastNames, $idCourse) {
+        $resultado = loadLogs($idStudent);
+
+        $anteriorIgual = false;
+        $anteriorCursoDistinto = true;
+        $sumaTotal = 0;
+
+        $arrayDiferencias = array();
+        $dateBeginActivity = array();
+
+        $contadorRegistro = 0;
+
+        foreach ($resultado as $rs) {
+            $contadorRegistro += 1;
+            $course = $rs->courseid;
+
+            if ($course == $idCourse) {
+                if ($anteriorIgual == true) {
+                    $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                    $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                    $sumaTotal += $diferencia;
+
+                    if ($contadorRegistro == sizeof($resultado)) {
+                        array_push($arrayDiferencias, $sumaTotal);
+                        $sumaTotal = 0;
+                        $anteriorCursoDistinto = true;
+                        $anteriorIgual = false;
+                    }
+
+                    $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                    $anteriorIgual = true;
+                } else {
+                    $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                    array_push($dateBeginActivity, $inicio);
+                    $anteriorIgual = true;
+                }
+                $anteriorCursoDistinto = false;
+            } else {
+                if ($anteriorCursoDistinto == false) {
+                    $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                    $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                    $sumaTotal += $diferencia;
+
+                    array_push($arrayDiferencias, $sumaTotal);
+                    $sumaTotal = 0;
+                    $anteriorCursoDistinto = true;
+                    $anteriorIgual = false;
+                }
+            }
+        }
+
+        foreach ($arrayDiferencias as $key => $value) {
+            if ($value == 0) {
+                unset($arrayDiferencias[$key]);
+            }
+        }
+
+        $arrayDiferencias = array_values($arrayDiferencias);
+        $contadorNum = 0;
+        foreach ($arrayDiferencias as $unRegistro) {
+            $unRegistro->idAlumno = $idStudent;
+            $unRegistro->nombre = $firstLastNames;
+            $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');
+            $unRegistro->duracion = $arrayDiferencias[$contadorNum];
+            array_push($variableCSV, json_encode($unRegistro));
+            $contadorNum = $contadorNum + 1;
+        }
+        return $variableCSV;
+    }
+
     public static function getSemesterAvgTimeSpentPerDay($idStudent, $idCourse) {
         $resultado = loadLogs($idStudent);
 
@@ -105,7 +175,6 @@ class Student {
             $course = $rs->courseid;
 
             if ($course == $idCourse) {
-
                 if ($anteriorIgual == true) {
                     $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
                     $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
@@ -566,6 +635,173 @@ class Student {
         }
 
         return array_combine($namesTableActivities, $finalTableValues);
+    }
+
+    public static function getSemesterAvgTimeSpentPerActivityPerDayCSV(&$variableCSV, $idStudent, $firstLastNames, $idCourse) {
+        $resultado = loadLogs($idStudent);
+
+        $anteriorIgual = false;
+        $anteriorCursoDistinto = true;
+        $sumaTotal = 0;
+
+        $arrayDiferencias = array();
+        $arrayFechasInicio = array();
+        $arrayFechasFin = array();
+
+        $contadorRegistro = 0;
+
+        $primerDiaCheck = NULL;
+        $ultimoDiaCheck = NULL;
+
+        foreach ($resultado as $rs) {
+            $contadorRegistro += 1;
+            $course = $rs->courseid;
+
+            if ($contadorRegistro == 1) {
+                $primerDiaCheck = new DateTime(date('Y-m-d', $rs->timecreated));
+            }
+            if ($contadorRegistro == sizeof($resultado)) {
+                $ultimoDiaCheck = new DateTime(date('Y-m-d', $rs->timecreated));
+            }
+
+            if ($course == $idCourse) {
+                if ($anteriorIgual == true) {
+                    $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                    $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                    $sumaTotal += $diferencia;
+
+                    if ($contadorRegistro == sizeof($resultado)) {
+                        array_push($arrayDiferencias, $sumaTotal);
+                        array_push($arrayFechasFin, new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                        $sumaTotal = 0;
+                        $anteriorCursoDistinto = true;
+                        $anteriorIgual = false;
+                    }
+
+                    $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                    $anteriorIgual = true;
+                } else {
+                    $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                    array_push($arrayFechasInicio, $inicio);
+                    $anteriorIgual = true;
+                }
+                $anteriorCursoDistinto = false;
+            } else {
+                if ($anteriorCursoDistinto == false) {
+                    $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                    $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                    $sumaTotal += $diferencia;
+
+                    array_push($arrayDiferencias, $sumaTotal);
+                    array_push($arrayFechasFin, new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                    $sumaTotal = 0;
+                    $anteriorCursoDistinto = true;
+                    $anteriorIgual = false;
+                }
+            }
+        }
+
+        $beginActivity = NULL;
+        $idActivity = array();
+        $nameActivity = array();
+        $timeActivity = array();
+        $dateBeginActivity = array();
+
+        $beforeActivity = NULL;
+        $firstId = NULL;
+        $contadorMods = 0;
+
+        $idMods = array();
+
+        foreach ($resultado as $key => $rs) {
+            if (strpos($rs->component, "mod") !== false) {
+                if (is_null($beginActivity)) {
+                    if ($_GET['idCourse'] == $rs->courseid) {
+                        $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                        $firstId = $rs->id;
+                    }
+                } else {
+                    if ($beforeActivity != $rs->component) {
+                        $diferencia = $beginActivity->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                        $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                        array_push($idMods, $rs->id);
+                        array_push($idActivity, $firstId);
+                        array_push($nameActivity, $beforeActivity);
+                        array_push($timeActivity, $diferencia);
+                        array_push($dateBeginActivity, $beginActivity);
+                        $beginActivity = NULL;
+                        $diferencia = NULL;
+                        $firstId = NULL;
+                        if ($_GET['idCourse'] == $rs->courseid) {
+                            $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
+                            $firstId = $rs->id;
+                        }
+                    } else {
+                        if (sizeof($resultado) == ($contadorMods + 1)) {
+                            $diferencia = $beginActivity->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                            $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                            array_push($idMods, $rs->id);
+                            array_push($idActivity, $firstId);
+                            array_push($nameActivity, $beforeActivity);
+                            array_push($timeActivity, $diferencia);
+                            array_push($dateBeginActivity, $beginActivity);
+                            $beginActivity = NULL;
+                            $diferencia = NULL;
+                            $firstId = NULL;
+                        }
+                    }
+                }
+            } else {
+                if (!is_null($beginActivity)) {
+                    $diferencia = $beginActivity->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
+                    $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
+                    array_push($idMods, $rs->id);
+                    array_push($idActivity, $firstId);
+                    array_push($nameActivity, $beforeActivity);
+                    array_push($timeActivity, $diferencia);
+                    array_push($dateBeginActivity, $beginActivity);
+                    $beginActivity = NULL;
+                    $diferencia = NULL;
+                    $firstId = NULL;
+                }
+            }
+            $beforeActivity = $rs->component;
+            $contadorMods += 1;
+        }
+
+        $namesTableActivities = array_unique($nameActivity);
+        $namesTableActivities = array_values($namesTableActivities);
+        $timesTableActivities = array();
+
+        $size_tableactivities = sizeof($namesTableActivities);
+        for ($i = 0; $i < $size_tableactivities; $i++) {
+            $timesTableActivities[$i] = array();
+        }
+
+        $date_from = $primerDiaCheck->format('Y-m-d');
+        $date_from = strtotime($date_from);
+
+        $date_to = $ultimoDiaCheck->format('Y-m-d');
+        $date_to = strtotime($date_to);
+
+        $allDays = array();
+        for ($i = $date_from; $i <= $date_to; $i += 86400) {
+            array_push($allDays, date("Y-m-d", $i));
+        }
+
+        $contadorNum = 0;
+
+        foreach ($nameActivity as $unRegistro) {
+            $unRegistro->idAlumno = $idAlumno;
+            $unRegistro->nombre = $firstLastNames;
+            $unRegistro->herramienta = $nameActivity[$contadorNum];
+            $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');
+            $unRegistro->duracion = $timeActivity[$contadorNum];
+
+            array_push($variableCSV, json_encode($unRegistro));
+
+            $contadorNum = $contadorNum + 1;
+        }
     }
 
     public static function getSemesterAccessesCount($idStudent, $idCourse, $idUser) {

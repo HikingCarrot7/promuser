@@ -10,6 +10,7 @@ $variableCSV = array();
 
 function getPromByGroupPerInterval() {
     global $USER;
+    global $variableCSV;
     $course_id = $_GET['idCourse'];
     //Se obtienen los usuarios de este curso con una función del archivo Queries.php
     $resultado = getUsersInThisCourse($course_id);
@@ -18,79 +19,8 @@ function getPromByGroupPerInterval() {
         if ($USER->id != $rs->userid) {
             $namesComplete = $rs->firstname . " " . $rs->lastname;
             $namesComplete = str_replace(" ", ";", $namesComplete);
-            getPromPerAlumno($rs->userid, $namesComplete);
+            Student::getSemesterAvgTimeSpentCSV($variableCSV, $rs->userid, $namesComplete, $course_id);
         }
-    }
-}
-
-function getPromPerAlumno($idAlumno, $firstLastNames) {
-    global $variableCSV;
-    $idCourse = $_GET['idCourse'];
-    $resultado = loadLogs($idAlumno);
-
-    $anteriorIgual = false;
-    $anteriorCursoDistinto = true;
-    $sumaTotal = 0;
-
-    $arrayDiferencias = array();
-    $dateBeginActivity = array();
-
-    $contadorRegistro = 0;
-
-    foreach ($resultado as $rs) {
-        $contadorRegistro += 1;
-        $course = $rs->courseid;
-
-        if ($course == $idCourse) {
-            if ($anteriorIgual == true) {
-                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                $sumaTotal += $diferencia;
-
-                if ($contadorRegistro == sizeof($resultado)) {
-                    array_push($arrayDiferencias, $sumaTotal);
-                    $sumaTotal = 0;
-                    $anteriorCursoDistinto = true;
-                    $anteriorIgual = false;
-                }
-
-                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-                $anteriorIgual = true;
-            } else {
-                $inicio = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
-                array_push($dateBeginActivity, $inicio);
-                $anteriorIgual = true;
-            }
-            $anteriorCursoDistinto = false;
-        } else {
-            if ($anteriorCursoDistinto == false) {
-                $diferencia = $inicio->diff(new DateTime(date('Y-m-d H:i:s', $rs->timecreated)));
-                $diferencia = (($diferencia->days * 24) * 60) + ($diferencia->i * 60) + $diferencia->s;
-                $sumaTotal += $diferencia;
-
-                array_push($arrayDiferencias, $sumaTotal);
-                $sumaTotal = 0;
-                $anteriorCursoDistinto = true;
-                $anteriorIgual = false;
-            }
-        }
-    }
-
-    foreach ($arrayDiferencias as $key => $value) {
-        if ($value == 0) {
-            unset($arrayDiferencias[$key]);
-        }
-    }
-
-    $arrayDiferencias = array_values($arrayDiferencias);
-    $contadorNum = 0;
-    foreach ($arrayDiferencias as $unRegistro) {
-        $unRegistro->idAlumno = $idAlumno;
-        $unRegistro->nombre = $firstLastNames;
-        $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');
-        $unRegistro->duracion = $arrayDiferencias[$contadorNum];
-        array_push($variableCSV, json_encode($unRegistro));
-        $contadorNum = $contadorNum + 1;
     }
 }
 

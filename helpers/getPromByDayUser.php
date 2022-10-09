@@ -34,11 +34,12 @@ foreach ($resultado as $rs) {
         $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
     }
     $diaVueltaActual = new DateTime(date('Y-m-d', $rs->timecreated));
-
     $contadorRegistro += 1;
+
     if ($contadorRegistro == sizeof($resultado)) {
         $last_date = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
     }
+
     $course = $rs->courseid;
 
     if ($course == $idCourse) {
