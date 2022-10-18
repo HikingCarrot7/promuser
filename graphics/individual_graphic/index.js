@@ -75,10 +75,12 @@ function sinAndCos(arrayJson) {
   prom = prom / arrayJson.length;
   prom = Math.round(prom);
 
-  //let result2 = localStorage.getItem('totalPromResult2');
+  
+  let result2 = localStorage.getItem('totalPromResult2');
   if (result2 == null) {
     minutes_group = 0.0;
   } else {
+    
     proms_minutes = result2.split(':');
     minutes_group += parseFloat(proms_minutes[2]);
     minutes_group += parseFloat(proms_minutes[1]) * 60;

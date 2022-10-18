@@ -4,6 +4,7 @@ defined('MOODLE_INTERNAL') || die();
 global $COURSE;
 global $USER;
 include('../database/Queries.php');
+include('../database/FilesChecker.php');
 
 $idCourse = $_GET['courseVar'];
 $idUser = $_GET['var'];

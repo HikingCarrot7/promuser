@@ -65,7 +65,7 @@ function showInformation() {
       seconds1 = seconds1 < 10 ? '0' + seconds1 : seconds1;
 
       let result2 = hours1 + ':' + minutes1 + ':' + seconds1;
-      //localStorage.setItem('totalPromResult2', result2);
+      localStorage.setItem('totalPromResult2', result2);
       document.getElementById('generalInformation2').innerHTML = result2;
     }
   };

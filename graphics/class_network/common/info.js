@@ -1,5 +1,6 @@
-// const info = JSON.parse(sessionStorage.getItem("classInformationByDay"));
+const info = JSON.parse(sessionStorage.getItem("classInformationByDay"));
 
+/*
 const info = {
   'LUIS,MANUEL,OJEDA,BONILLA': [
     {
@@ -325,3 +326,4 @@ const info = {
     3216,
   ],
 };
+*/
