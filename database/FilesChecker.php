@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . '/../models/Student.php');
 
 //Funciones de inicialización ---------------------------------------------------------------------
 
-function initializeContext ($courseId, $professorId) {
+function initializeContext($courseId, $professorId) {
     $context = new ContextData($courseId);
     $context->courseContextId = getCourseContextId($courseId);
     $context->studentRoleId = getStudentRoleId();
@@ -13,7 +13,7 @@ function initializeContext ($courseId, $professorId) {
     writeContextFile($context);
 }
 
-function loadUsers () {
+function loadUsers() {
     //Se lee el objeto Group
     $group = readGroupFile();
     $context = readContextFile();
@@ -33,25 +33,25 @@ function loadUsers () {
 //Funciones para obtener datos del contexto -------------------------------------------------------
 
 
-function loadCourseContextId () {
+function loadCourseContextId() {
     $context = readContextFile();
     return $context->courseContextId;
 }
 
 
-function loadStudentRoleId () {
+function loadStudentRoleId() {
     $context = readContextFile();
     return $context->studentRoleId;
 }
 
 
-function loadCourseId () {
+function loadCourseId() {
     $context = readContextFile();
     return $context->courseId;
 }
 
 
-function loadProfessorId () {
+function loadProfessorId() {
     $context = readContextFile();
     return $context->professorId;
 }
@@ -61,7 +61,7 @@ function loadProfessorId () {
 
 //Funciones para obtener datos del grupo ----------------------------------------------------------
 
-function getUsersIds () {
+function getUsersIds() {
     $ids = array();
     $users = loadUsers();
     foreach ($users as $key => $aUser) {
@@ -70,7 +70,7 @@ function getUsersIds () {
     return $ids;
 }
 
-function loadGroupSATS () {
+function loadGroupSATS() {
     $group = readGroupFile();
     $context = readContextFile();
 
@@ -82,7 +82,7 @@ function loadGroupSATS () {
     return $group->SATS;
 }
 
-function loadGroupSATPD () {
+function loadGroupSATPD() {
     $group = readGroupFile();
     $context = readContextFile();
 
@@ -98,23 +98,23 @@ function loadGroupSATPD () {
 
 //Funciones para obtener datos de estudiantes -----------------------------------------------------
 
-function getAnStudent ($id) {
+function getAnStudent($id) {
     $students = readStudentsFile();
-    
+
     if ($students[$id] == null) {
         $student = new Student($id);
         $data = getUserData($id);
 
         $student->firstname = $data->firstname;
         $student->lastname = $data->lastname;
-    }else {
+    } else {
         $student = $students[$id];
     }
 
     return $student;
 }
 
-function loadLogs ($id) {
+function loadLogs($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -127,12 +127,12 @@ function loadLogs ($id) {
     return $student->logs;
 }
 
-function loadFirstLog ($id) {
+function loadFirstLog($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
     if ($student->firstLog == null) {
-        $extraIndications = "ORDER BY timecreated ASC LIMIT 1";// Indicacines para la búsqueda en BD
+        $extraIndications = "ORDER BY timecreated ASC LIMIT 1"; // Indicacines para la búsqueda en BD
         $student->firstLog = getLogs($id, $context->professorId, $extraIndications);
         updateAnStudent($student);
     }
@@ -140,12 +140,12 @@ function loadFirstLog ($id) {
     return $student->firstLog;
 }
 
-function loadLastLog ($id) {
+function loadLastLog($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
     if ($student->lastLog == null) {
-        $extraIndications = "ORDER BY timecreated DESC LIMIT 1";// Indicacines para la búsqueda en BD
+        $extraIndications = "ORDER BY timecreated DESC LIMIT 1"; // Indicacines para la búsqueda en BD
         $student->lastLog = getLogs($id, $context->professorId, $extraIndications);
         updateAnStudent($student);
     }
@@ -153,7 +153,7 @@ function loadLastLog ($id) {
     return $student->lastLog;
 }
 
-function loadLogins ($id) {
+function loadLogins($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -165,7 +165,7 @@ function loadLogins ($id) {
     return $student->logins;
 }
 
-function loadSAC ($id) {
+function loadSAC($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -180,7 +180,7 @@ function loadSAC ($id) {
     return $student->SAC;
 }
 
-function loadSATSPPDCSV ($id) {
+function loadSATSPPDCSV($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -195,7 +195,7 @@ function loadSATSPPDCSV ($id) {
     return $student->SATSPPDCSV;
 }
 
-function loadSATSPAPD ($id) {
+function loadSATSPAPD($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -210,7 +210,7 @@ function loadSATSPAPD ($id) {
     return $student->SATSPAPD;
 }
 
-function loadSATSPA ($id) {
+function loadSATSPA($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -225,7 +225,7 @@ function loadSATSPA ($id) {
     return $student->SATSPA;
 }
 
-function loadSATSPD ($id) {
+function loadSATSPD($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -240,7 +240,7 @@ function loadSATSPD ($id) {
     return $student->SATSPD;
 }
 
-function loadSATSCSV ($id) {
+function loadSATSCSV($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -255,7 +255,7 @@ function loadSATSCSV ($id) {
     return $student->SATSCSV;
 }
 
-function loadSATS ($id) {
+function loadSATS($id) {
     $context = readContextFile();
     $student = getAnStudent($id);
 
@@ -270,7 +270,7 @@ function loadSATS ($id) {
     return $student->SATS;
 }
 
-function updateAnStudent ($student) {
+function updateAnStudent($student) {
     $students = readStudentsFile();
     $students[$student->id] = $student;
     writeStudentsFile($students);
@@ -280,12 +280,12 @@ function updateAnStudent ($student) {
 
 //Funciones de lectura y escritura para archivos ContextData, Group y Student ---------------------
 
-function writeContextFile ($data) {
+function writeContextFile($data) {
     $pathFile = dirname(__FILE__) . '/../files/ContextData.txt';
     writeDataFile($pathFile, $data);
 }
 
-function readContextFile () {
+function readContextFile() {
     $pathFile = dirname(__FILE__) . '/../files/ContextData.txt';
     $data = readDataFile($pathFile);
     $context = new ContextData($data->courseId);
@@ -297,7 +297,7 @@ function readContextFile () {
     return $context;
 }
 
-function readGroupFile () {
+function readGroupFile() {
     $pathFile = dirname(__FILE__) . '/../files/Group.txt';
     $group = new Group();
     $data = readDataFile($pathFile);
@@ -309,12 +309,12 @@ function readGroupFile () {
     return $group;
 }
 
-function writeGroupFile ($data) {
+function writeGroupFile($data) {
     $pathFile = dirname(__FILE__) . '/../files/Group.txt';
     writeDataFile($pathFile, $data);
 }
 
-function readStudentsFile () {
+function readStudentsFile() {
     $pathFile = dirname(__FILE__) . '/../files/Students.txt';
     $students = array();
     $data = readDataFile($pathFile);
@@ -343,7 +343,7 @@ function readStudentsFile () {
     return $students;
 }
 
-function writeStudentsFile ($data) {
+function writeStudentsFile($data) {
     $pathFile = dirname(__FILE__) . '/../files/Students.txt';
     writeDataFile($pathFile, $data);
 }
@@ -352,12 +352,12 @@ function writeStudentsFile ($data) {
 
 //Funciones genéricas de lectura y escritura de archivos ------------------------------------------
 
-function writeDataFile ($pathFile, $data) {
+function writeDataFile($pathFile, $data) {
     $writtenBytes = file_put_contents($pathFile, json_encode($data));
     return $writtenBytes;
 }
 
-function readDataFile ($pathFile) {
+function readDataFile($pathFile) {
     $data = json_decode(file_get_contents($pathFile));
     return $data;
 }
