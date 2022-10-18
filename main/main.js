@@ -345,3 +345,25 @@ function showUserSelectedAverages () {
   changeTitleModalUser('Tiempo promedio por día');
   changeStudentNameModalUser(userName);
 }
+
+
+function clearData() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      //JSON.parse(this.responseText);
+    }
+  };
+  var windowLocation = window.location;
+  var pathname = windowLocation.pathname.split('/');
+  var directory =
+    windowLocation.origin +
+    '/' +
+    pathname[1] +
+    '/blocks/promuser/database/Cleaner.php';
+
+  xhttp.open('POST', directory, true);
+  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  xhttp.send();
+  location.reload(true);
+}

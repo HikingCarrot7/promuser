@@ -1,20 +1,31 @@
 <?php
 
 class Student {
+    //Atributos de un estudiante
     public $id;
-    public $name;
+    public $firstname;
+    public $lastname;
     public $logs;
-    public $average;
-    public $averagePerActivity;
-    public $averagePerDay;
-    public $averagePerActivityPerDay;
+    public $firstLog;
+    public $lastLog;
+    public $logins;
+
+    //Datos calculados del estudiante
+    public $SATS;
+    public $SATSCSV;
+    public $SATSPD;
+    public $SATSPA;
+    public $SATSPAPD;
+    public $SATSPPDCSV;
+    public $SAC;
 
     public function __construct($id) {
         $this->id = $id;
     }
 
-    public static function getSemesterAvgTimeSpent($idStudent, $idCourse) {
-        $resultado = loadLogs($idStudent);
+    //Funcion para obtener SATS
+    public function getSemesterAvgTimeSpent($idCourse) {
+        $resultado = $this->logs;
 
         $anteriorIgual = false;
         $anteriorCursoDistinto = true;
@@ -77,11 +88,17 @@ class Student {
             $valorTotal = 0;
         }
 
-        return $valorTotal;
+        $SATS = $valorTotal;
+        $this->SATS = $SATS;
+        
+        return $SATS;
     }
 
-    public  static function getSemesterAvgTimeSpentCSV(&$variableCSV, $idStudent, $firstLastNames, $idCourse) {
-        $resultado = loadLogs($idStudent);
+    //Funcion para obtener SATSCSV
+    public function getSemesterAvgTimeSpentCSV($idCourse) {
+        $firstLastNames = $this->firstname . " " . $this->lastname;
+        $variableCSV = array ();
+        $resultado = $this->logs;
 
         $anteriorIgual = false;
         $anteriorCursoDistinto = true;
@@ -140,18 +157,23 @@ class Student {
         $arrayDiferencias = array_values($arrayDiferencias);
         $contadorNum = 0;
         foreach ($arrayDiferencias as $unRegistro) {
-            $unRegistro->idAlumno = $idStudent;
+            $unRegistro->idAlumno = $this->id;
             $unRegistro->nombre = $firstLastNames;
             $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');
             $unRegistro->duracion = $arrayDiferencias[$contadorNum];
             array_push($variableCSV, json_encode($unRegistro));
             $contadorNum = $contadorNum + 1;
         }
-        return $variableCSV;
+
+        $SATSCSV = $variableCSV;
+        $this->SATSCSV = $SATSCSV;
+
+        return $SATSCSV;
     }
 
-    public static function getSemesterAvgTimeSpentPerDay($idStudent, $idCourse) {
-        $resultado = loadLogs($idStudent);
+    //Funcion para obtener SATSPD
+    public function getSemesterAvgTimeSpentPerDay($idCourse) {
+        $resultado = $this->logs;
 
         $anteriorIgual = false;
         $anteriorCursoDistinto = true;
@@ -267,11 +289,15 @@ class Student {
             $valorTotal = 0;
         }
 
-        return $valorTotal;
+        $SATSPD = $valorTotal;
+        $this->SATSPD = $SATSPD;
+
+        return $SATSPD;
     }
 
-    public static function getSemesterAvgTimeSpentPerActivity($idStudent, $idCourse) {
-        $resultado = loadLogs($idStudent);
+    //Funcion para obtener SATSPA
+    public function getSemesterAvgTimeSpentPerActivity($idCourse) {
+        $resultado = $this->logs;
 
         $anteriorIgual = false;
         $anteriorCursoDistinto = true;
@@ -440,11 +466,15 @@ class Student {
             $sumActivity = 0;
         }
 
-        return array_combine($namesTableActivities, $finalTableValues);
+        $SATSPA = array_combine($namesTableActivities, $finalTableValues);
+        $this->SATSPA = $SATSPA;
+        
+        return $SATSPA;
     }
 
-    public static function getSemesterAvgTimeSpentPerActivityPerDay($idStudent, $idCourse) {
-        $resultado = loadLogs($idStudent);
+    //Funcion para obtener SATSPAPD
+    public function getSemesterAvgTimeSpentPerActivityPerDay($idCourse) {
+        $resultado = $this->logs;
 
         $anteriorIgual = false;
         $anteriorCursoDistinto = true;
@@ -634,11 +664,17 @@ class Student {
             $sumActivity = 0;
         }
 
-        return array_combine($namesTableActivities, $finalTableValues);
+        $SATSPAPD = array_combine($namesTableActivities, $finalTableValues);
+        $this->SATSPAPD = $SATSPAPD;
+
+        return $SATSPAPD;
     }
 
-    public static function getSemesterAvgTimeSpentPerActivityPerDayCSV(&$variableCSV, $idStudent, $firstLastNames, $idCourse) {
-        $resultado = loadLogs($idStudent);
+    //Funcion para obtener SATSPPDCSV
+    public function getSemesterAvgTimeSpentPerActivityPerDayCSV($idCourse) {
+        $variableCSV = array();
+        $firstLastNames = $this->firstname . " " . $this->lastname;
+        $resultado = $this->logs;
 
         $anteriorIgual = false;
         $anteriorCursoDistinto = true;
@@ -716,7 +752,7 @@ class Student {
         foreach ($resultado as $key => $rs) {
             if (strpos($rs->component, "mod") !== false) {
                 if (is_null($beginActivity)) {
-                    if ($_GET['idCourse'] == $rs->courseid) {
+                    if ($idCourse == $rs->courseid) {
                         $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
                         $firstId = $rs->id;
                     }
@@ -732,7 +768,7 @@ class Student {
                         $beginActivity = NULL;
                         $diferencia = NULL;
                         $firstId = NULL;
-                        if ($_GET['idCourse'] == $rs->courseid) {
+                        if ($idCourse == $rs->courseid) {
                             $beginActivity = new DateTime(date('Y-m-d H:i:s', $rs->timecreated));
                             $firstId = $rs->id;
                         }
@@ -802,15 +838,21 @@ class Student {
 
             $contadorNum = $contadorNum + 1;
         }
+
+        $SATSPPDCSV = $variableCSV;
+        $this->SATSPPDCSV = $SATSPPDCSV;
+
+        return $SATSPPDCSV;
     }
 
-    public static function getSemesterAccessesCount($idStudent, $idCourse, $idUser) {
-        $resultado = getAccesses($idStudent, $idCourse);
+    //Funcion para obtener SAC
+    public function getSemesterAccessesCount($professorId) {
+        $resultado = $this->logins;
         $sumAccess = 0;
         $loggedin = false;
 
         foreach ($resultado as $key => $rs) {
-            if ($idUser != $rs->userid) {
+            if ($professorId != $rs->userid) {
                 if ($rs->action == 'loggedin' && $loggedin == false) {
                     $loggedin = true;
                 } else {
@@ -822,6 +864,9 @@ class Student {
             }
         }
 
-        return $sumAccess;
+        $SAC = $sumAccess;
+        $this->SAC = $SAC;
+        
+        return $SAC;
     }
 }

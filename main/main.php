@@ -66,8 +66,15 @@ $contentPromUser = <<< EOT
     <span>Generando...</span>
     </div>
 
-
     <script src='../blocks/promuser/main/main.js'></script>
+
+    <hr>
+    <button onclick="clearData()" id="clearData" style="width: 100%;" class="btn btn-sm btn-warning">
+        Limpiar caché
+    </button>
+
+
+    
     
 EOT;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,25 +1,20 @@
 <?php
 
 class Group {
-    public $averagePerSession;
-    public $averagePerDay;
     public $users;
-    public $averagePerActivity;
-    public $averagePerActivityPerDay;
+    public $SATS;
+    public $SATPD;
 
-    public static function getSemesterAvgTimeSpent($idCourse, $idUser) {
+    //Funcion para obtener SATS
+    public function getSemesterAvgTimeSpent($professorId) {
         $sumaPromediosGrupo = 0;
         $arrayTiemposAlumnos = array();
-        //Se obtiene el rol de estudiante con una función del archivo Queries.php
-        $id_role_student = getStudentRoleId();
-        //Se obtiene el contextId con una función del archivo Queries.php 
-        $contextId = loadCourseContextId();
-        //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-        $resultado = getUsersInThisCourse($idCourse);
+
+        $resultado = loadUsers();
 
         foreach ($resultado as $rs) {
-            if ($idUser != $rs->userid) {
-                $promedioTiempoAlumno = Student::getSemesterAvgTimeSpent($rs->userid, $idCourse);
+            if ($professorId != $rs->userid) {
+                $promedioTiempoAlumno = loadSATS($rs->userid);
                 $sumaPromediosGrupo += $promedioTiempoAlumno;
                 array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
             }
@@ -27,26 +22,23 @@ class Group {
 
         $valorTotalGrupo = $sumaPromediosGrupo / sizeof($arrayTiemposAlumnos);
         $valorTotalGrupo = round($valorTotalGrupo);
-        return $valorTotalGrupo;
+        
+        $SATS = $valorTotalGrupo;
+        $this->SATS = $SATS;
+        
+        return $SATS;
     }
 
-    public static function getSemesterAvgTimePerDay() {
-        $course_id = loadCourseId();
-        $professorId = loadProfessorId();
-
+    //Funcion para obtener SATPD
+    public function getSemesterAvgTimePerDay($professorId) {
         $sumaPromediosGrupo = 0;
         $arrayTiemposAlumnos = array();
 
-        //Se obtiene el rol de estudiante con una función del archivo Queries.php
-        $id_role_student = getStudentRoleId();
-        //Se obtiene el contextId con una función del archivo Queries.php 
-        $contextId = loadCourseContextId();
-        //Se obtienen los usuarios de este curso con una función del archivo Queries.php
         $users = loadUsers();
 
         foreach ($users as $aUser) {
             if ($professorId != $aUser->userid) {
-                $promedioTiempoAlumno = Student::getSemesterAvgTimeSpentPerDay($aUser->userid, $course_id);
+                $promedioTiempoAlumno = loadSATSPD($aUser->userid);
                 $sumaPromediosGrupo += $promedioTiempoAlumno;
                 array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
             }
@@ -54,6 +46,10 @@ class Group {
 
         $valorTotalGrupo = $sumaPromediosGrupo / sizeof($arrayTiemposAlumnos);
         $valorTotalGrupo = round($valorTotalGrupo);
-        return $valorTotalGrupo;
+        
+        $SATPD = $valorTotalGrupo;
+        $this->SATPD = $SATPD;
+        
+        return $SATPD;
     }
 }

@@ -5,17 +5,9 @@ defined('MOODLE_INTERNAL') || die();
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
 
-global $USER;
-
-function generateTimes($idCourse, $idUser) {
-    $times = array();
-    $segundos = Group::getSemesterAvgTimeSpent($idCourse, $idUser);
-    $segundos1 = Group::getSemesterAvgTimePerDay();
-    array_push($times, $segundos);
-    array_push($times, $segundos1);
-    return $times;
-}
-
-$times = generateTimes($_POST['idCourse'], $USER->id);
+$segundos = loadGroupSATS();
+$segundos1 = loadGroupSATPD();
+    
+$times = [$segundos,$segundos1];
 
 echo json_encode($times);

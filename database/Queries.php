@@ -62,7 +62,7 @@ function getUsersInThisCourse($course_id) {
         mdl_user users ON data_role.userid = users.id;");
 }
 
-function getAccesses($idAlumno, $course_id) {
+function getLogins($idAlumno, $course_id) {
     global $DB;
     return $DB->get_records_sql(
         "

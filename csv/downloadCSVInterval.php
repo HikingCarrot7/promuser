@@ -5,26 +5,21 @@ defined('MOODLE_INTERNAL') || die();
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
 
-global $USER;
-$variableCSV = array();
 
 function getPromByGroupPerInterval() {
-    global $USER;
-    global $variableCSV;
-    $course_id = $_GET['idCourse'];
-    //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-    $resultado = getUsersInThisCourse($course_id);
+    $professorId = loadProfessorId();
+    $resultado = loadUsers();
 
     foreach ($resultado as $rs) {
-        if ($USER->id != $rs->userid) {
-            $namesComplete = $rs->firstname . " " . $rs->lastname;
-            $namesComplete = str_replace(" ", ";", $namesComplete);
-            Student::getSemesterAvgTimeSpentCSV($variableCSV, $rs->userid, $namesComplete, $course_id);
+        if ($professorId != $rs->userid) {
+            $variableCSV = loadSATSCSV($rs->userid);
         }
     }
+
+    return $variableCSV;
 }
 
-getPromByGroupPerInterval();
+$variableCSV = getPromByGroupPerInterval();
 
 $data = "";
 $counter = 0;

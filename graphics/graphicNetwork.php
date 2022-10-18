@@ -7,7 +7,7 @@ include('../database/Queries.php');
 
 $idCourse = $_GET['courseVar'];
 $idUser = $_GET['var'];
-$user = getUserData($idUser);
+$user = getAnStudent($idUser);
 $total_sum = 0;
 $counter_record = 0;
 $counter_id = 2;

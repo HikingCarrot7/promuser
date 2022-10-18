@@ -8,16 +8,15 @@ include('../database/FilesChecker.php');
 global $COURSE;
 global $USER;
 
-$course_id = $_POST['idCourse'];
 $user_id = $USER->id;
 
-function getSemesterAvgTimeSpentForAllStudents($idCourse, $idUser) {
+function getSemesterAvgTimeSpentForAllStudents($idUser) {
     $arrayTiemposAlumnos = array();
-    $resultado = getUsersInThisCourse($idCourse);
+    $resultado = loadUsers();
 
     foreach ($resultado as $rs) {
         if ($idUser != $rs->userid) {
-            $promedioTiempoAlumno = Student::getSemesterAvgTimeSpentPerDay($rs->userid, $idCourse);
+            $promedioTiempoAlumno = loadSATSPD($rs->userid);
             array_push($arrayTiemposAlumnos, $promedioTiempoAlumno);
         }
     }
@@ -52,9 +51,9 @@ foreach ($resultado as $keyUser => $rs) {
 
         $namesComplete = $rs->firstname . " " . $rs->lastname;
         $namesComplete = str_replace(" ", ",", $namesComplete);
-        $matrizResultado = Student::getSemesterAvgTimeSpentPerActivityPerDay($rs->userid, $course_id);
+        $matrizResultado = loadSATSPAPD($rs->userid);
 
-        $numberAccess = Student::getSemesterAccessesCount($rs->userid, $course_id, $user_id);
+        $numberAccess = loadSAC($rs->userid);
 
         $tablaFinal = array();
         $promFinal = 0;
@@ -71,7 +70,7 @@ $totalQuantities = array();
 $totalValues = array_combine($students, $studentActivitiesProms);
 $totalQuantities = array_combine($students, $quantities);
 
-$promTimes = getSemesterAvgTimeSpentForAllStudents($course_id, $user_id);
+$promTimes = getSemesterAvgTimeSpentForAllStudents($user_id);
 
 $index_number = 0;
 foreach ($totalValues as $index => $value) {

@@ -4,28 +4,27 @@ defined('MOODLE_INTERNAL') || die();
 include('../database/Queries.php');
 include('../database/FilesChecker.php');
 
-global $USER;
-$variableCSV = array();
+
 
 function getPromActivitiesPerOption($option) {
-    global $USER;
-    global $variableCSV;
-    $course_id = $_GET['idCourse'];
+    $professorId = loadProfessorId();
+    $variableCSV = array();
+    $course_id = loadCourseId();
     //Se obtienen los usuarios de este curso con una función del archivo Queries.php
-    $resultado = getUsersInThisCourse($course_id);
+    $resultado = loadUsers();
 
     foreach ($resultado as $keyUser => $rs) {
-        if ($USER->id != $rs->userid) {
-            $namesComplete = $rs->firstname . " " . $rs->lastname;
-            $namesComplete = str_replace(" ", ";", $namesComplete);
+        if ($professorId != $rs->userid) {
             if ($option == "day") {
-                Student::getSemesterAvgTimeSpentPerActivityPerDayCSV($variableCSV, $rs->userid, $namesComplete, $course_id);
+                $variableCSV = loadSATSPPDCSV($rs->userid);
             }
         }
     }
+
+    return $variableCSV;
 }
 
-getPromActivitiesPerOption("day");
+$variableCSV = getPromActivitiesPerOption("day");
 
 $data = "";
 $counter = 0;

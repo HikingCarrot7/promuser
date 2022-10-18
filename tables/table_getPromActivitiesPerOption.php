@@ -36,10 +36,9 @@ foreach ($resultado as $keyUser => $rs) {
         $namesComplete = $rs->firstname . " " . $rs->lastname;
         $namesComplete = str_replace(" ", ",", $namesComplete);
         if ($option_selected == "interval") {
-            $matrizResultado = Student::getSemesterAvgTimeSpentPerActivity($rs->userid, $course_id);
+            $matrizResultado = loadSATSPA($rs->userid);
             //FIRST DATE
-            $extra_indications = "ORDER BY timecreated ASC LIMIT 1";
-            $rows = getLogs($rs->userid, $user_id, $extra_indications);
+            $rows = loadFirstLog($rs->userid);
             foreach ($rows as $row => $row_s) {
                 if ($first_date == '') {
                     $first_date = new DateTime(date('Y-m-d H:i:s', $row_s->timecreated));
@@ -51,8 +50,7 @@ foreach ($resultado as $keyUser => $rs) {
                 }
             }
             // LAST DATE
-            $extra_indications = "ORDER BY timecreated DESC LIMIT 1";
-            $rows = getLogs($rs->userid, $user_id, $extra_indications);
+            $rows = loadLastLog($rs->userid);
             foreach ($rows as $row => $row_s) {
                 if ($last_date == '') {
                     $last_date = new DateTime(date('Y-m-d H:i:s', $row_s->timecreated));
@@ -65,10 +63,9 @@ foreach ($resultado as $keyUser => $rs) {
             }
         } else {
             if ($option_selected == "day") {
-                $matrizResultado = Student::getSemesterAvgTimeSpentPerActivityPerDay($rs->userid, $course_id);
+                $matrizResultado = loadSATSPAPD($rs->userid);
                 //FIRST_DATE
-                $extra_indications = "ORDER BY timecreated ASC LIMIT 1";
-                $rows = getLogs($rs->userid, $user_id, $extra_indications);
+                $rows = loadFirstLog($rs->userid);
                 foreach ($rows as $row => $row_s) {
                     if ($first_date == '') {
                         $first_date = new DateTime(date('Y-m-d H:i:s', $row_s->timecreated));
@@ -80,8 +77,7 @@ foreach ($resultado as $keyUser => $rs) {
                     }
                 }
                 //LAST_DATE
-                $extra_indications = "ORDER BY timecreated DESC LIMIT 1";
-                $rows = getLogs($rs->userid, $user_id, $extra_indications);
+                $rows = loadLastLog($rs->userid);
                 foreach ($rows as $row => $row_s) {
                     if ($last_date == '') {
                         $last_date = new DateTime(date('Y-m-d H:i:s', $row_s->timecreated));
