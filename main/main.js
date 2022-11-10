@@ -159,22 +159,6 @@ function showGraphic() {
   );
 }
 
-function showGraphicNetworks() {
-  var windowLocation = window.location;
-  var pathname = windowLocation.pathname.split('/');
-  window.open(
-    windowLocation.origin +
-      '/' +
-      pathname[1] +
-      '/blocks/promuser/graphics/graphicNetwork.php?var=' +
-      document.getElementById('selectUserId').options[
-        document.getElementById('selectUserId').selectedIndex
-      ].value +
-      '&courseVar=' +
-      courseId
-  );
-}
-
 function showGraphicClassNetworks() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {

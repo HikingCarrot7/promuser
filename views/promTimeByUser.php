@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die();
           <span><strong>Tiempo promedio del alumno al día: </strong></span>
           <span id="modalByUserPromDay"></span>
           <br><div id="mostrarGrafica"><a style="color:green;cursor:pointer" onclick="showGraphic()">Mostrar gráfico de las sesiones</a></div>
-          <div id="mostrarGraficaRedes"><a style="color:blue;cursor:pointer" onclick="showGraphicNetworks()">Mostrar gráfico de relaciones</a></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
