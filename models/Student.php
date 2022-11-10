@@ -156,7 +156,7 @@ class Student {
 
         $arrayDiferencias = array_values($arrayDiferencias);
         $contadorNum = 0;
-        foreach ($arrayDiferencias as $unRegistro) {
+        foreach ($arrayDiferencias as $valorRegistro) {
             $unRegistro->idAlumno = $this->id;
             $unRegistro->nombre = $firstLastNames;
             $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');
@@ -827,8 +827,8 @@ class Student {
 
         $contadorNum = 0;
 
-        foreach ($nameActivity as $unRegistro) {
-            $unRegistro->idAlumno = $idAlumno;
+        foreach ($nameActivity as $valorRegistro) {
+            $unRegistro->idAlumno = $this->id;
             $unRegistro->nombre = $firstLastNames;
             $unRegistro->herramienta = $nameActivity[$contadorNum];
             $unRegistro->fechaInicio = $dateBeginActivity[$contadorNum]->format('d/m/Y H:i:s');

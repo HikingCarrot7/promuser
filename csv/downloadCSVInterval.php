@@ -9,10 +9,11 @@ include('../database/FilesChecker.php');
 function getPromByGroupPerInterval() {
     $professorId = loadProfessorId();
     $resultado = loadUsers();
+    $variableCSV = array();
 
     foreach ($resultado as $rs) {
         if ($professorId != $rs->userid) {
-            $variableCSV = loadSATSCSV($rs->userid);
+            $variableCSV = array_merge($variableCSV, loadSATSCSV($rs->userid));
         }
     }
 

@@ -16,7 +16,7 @@ function getPromActivitiesPerOption($option) {
     foreach ($resultado as $keyUser => $rs) {
         if ($professorId != $rs->userid) {
             if ($option == "day") {
-                $variableCSV = loadSATSPPDCSV($rs->userid);
+                $variableCSV = array_merge($variableCSV, loadSATSPPDCSV($rs->userid));
             }
         }
     }
