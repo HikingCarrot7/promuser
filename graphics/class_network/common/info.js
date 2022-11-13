@@ -1,4 +1,4 @@
-const info = JSON.parse(sessionStorage.getItem("classInformationByDay"));
+const info = JSON.parse(sessionStorage.getItem('classInformationByDay'));
 
 /*
 const info = {

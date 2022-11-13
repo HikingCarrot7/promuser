@@ -61,20 +61,29 @@ function createStudentNodes(students) {
 }
 
 function createMoodleNodes(students) {
-  const moodleNodes = moodleModules.map(({ id, ...rest }) => {
+  const referencedModules = getReferencedMoodleNodes(students);
+  const referencedNodes = referencedModules.map(({ id, ...rest }) => {
     const avgTimeSpent = calculateAvgTimeSpentForModule(students, id);
     return {
       data: {
+        ...rest,
         id,
         level: 100,
         avgTimeSpent,
         avgTimeSpentLabel: secondsToHms(avgTimeSpent),
-        ...rest,
       },
     };
   });
-  enrichMoodleNodesWithDiameter(moodleNodes);
-  return moodleNodes;
+  enrichMoodleNodesWithDiameter(referencedNodes);
+  return referencedNodes;
+}
+
+function getReferencedMoodleNodes(students) {
+  const referencedModules = new Set();
+  students.forEach((student) => {
+    student.modules.forEach((m) => referencedModules.add(m));
+  });
+  return moodleModules.filter((module) => referencedModules.has(module.id));
 }
 
 function enrichMoodleNodesWithDiameter(moodleNodes) {
