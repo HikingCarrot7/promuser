@@ -6,6 +6,7 @@ require_once(dirname(__FILE__) . '/../models/Student.php');
 //Funciones de inicialización ---------------------------------------------------------------------
 
 function initializeContext ($courseId, $professorId) {
+    mkdir(dirname(__FILE__) . '/../files');
     $context = new ContextData($courseId);
     $context->courseContextId = getCourseContextId($courseId);
     $context->studentRoleId = getStudentRoleId();

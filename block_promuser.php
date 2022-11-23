@@ -6,11 +6,6 @@ class block_promuser extends block_base {
 
     public function init() {
         $this->title = get_string('promuser', 'block_promuser');
-        $this->$variableCSV = array();
-    }
-
-    public function setIdUserPHP() {
-        return 'document.getElementById(\'selectUserId\').options[document.getElementById("selectUserId").selectedIndex].value';
     }
 
     public function get_content() {
